@@ -10,6 +10,7 @@ import { attachGraphQLSubscriptions, SUBSCRIPTIONS_PATH } from "./graphql/subscr
 import { startWebhookWorker } from "./workers/webhooks";
 import { startPartitionRetentionJob } from "./jobs/retention";
 import { startOrderReconciliationJob } from "./jobs/orderReconciliation";
+import { startDiscordRolesJob } from "./discord/sync";
 import { initTokenCache } from "./tokenCache";
 import { enabledNetworks } from "./network";
 import { isDatabaseUnreachable, onlyAddsUniqueConstraints, pushSchema } from "./schemaGuard";
@@ -275,6 +276,10 @@ async function main() {
 
   // The webhook is the fast path; this catches orders whose event never arrived.
   startOrderReconciliationJob();
+
+  // The Discord roles bot. A no-op unless DISCORD_* is configured, and nothing
+  // it does is awaited here: a broken bot must not hold up the service.
+  startDiscordRolesJob();
 
   // Seed token metadata for every served network before handling read paths.
   // API-only deployments skip the indexer, so without this explicit seed their

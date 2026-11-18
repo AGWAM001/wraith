@@ -987,3 +987,57 @@ export const ngnDataBundleSchema = z.object({
 export const ngnDataBundlesResponseSchema = z.object({
   bundles: z.array(ngnDataBundleSchema),
 });
+
+// ─── /discord/* — the Veil Discord roles bot (internal) ─────────────────────
+
+export const discordLinkCodeParamsSchema = z.object({
+  code: z.string().openapi({
+    description: "The eight-character code the bot gave the member. Case and a dash are ignored.",
+    example: "ABCD-2345",
+  }),
+});
+
+export const discordLinkCodeResponseSchema = z.object({
+  discordUserId: z.string().openapi({ description: "Discord's id for the member. Part of the text the wallet signs." }),
+  discordUsername: z.string().openapi({ description: "Shown to the member before they approve." }),
+  expiresAt: z.string().openapi({ description: "ISO time after which the code stops working." }),
+});
+
+export const discordLinkRequestSchema = z.object({
+  code: z.string(),
+  wallet: z.string().nullable().optional().openapi({ description: "The smart wallet (C address), when one is being linked." }),
+  spending: z.string().nullable().optional().openapi({ description: "The spending account (G address), when one is being linked." }),
+  passkey: z
+    .object({
+      publicKey: z.string().openapi({ description: "Base64url, 65 bytes: the passkey's uncompressed P-256 public key." }),
+      authData: z.string().openapi({ description: "Base64url WebAuthn authenticator data." }),
+      clientDataJSON: z.string().openapi({ description: "Base64url WebAuthn client data." }),
+      signature: z.string().openapi({ description: "Base64url, 64 bytes: the raw r and s of the signature." }),
+    })
+    .optional()
+    .openapi({ description: "Required with `wallet`: the passkey's signature over the link statement." }),
+  spendingSignature: z.string().optional().openapi({
+    description: "Required with `spending`: base64url Ed25519 signature over the link statement hash.",
+  }),
+  names: z.array(z.string()).optional().openapi({
+    description: "Veil names the app believes the member holds. Each is checked against the registry.",
+  }),
+});
+
+export const discordLinkResponseSchema = z.object({
+  linked: z.literal(true),
+  discordUsername: z.string(),
+  roles: z.array(z.string()).openapi({ description: "The role names the member now has." }),
+  incomplete: z.boolean().openapi({ description: "True when a check could not be finished and will be retried." }),
+  inServer: z.boolean().openapi({ description: "False when the member is not in the server, so no role could be set." }),
+});
+
+export const discordErrorResponseSchema = z.object({
+  error: z.string(),
+  code: z.string(),
+});
+
+export const discordInteractionResponseSchema = z
+  .object({ type: z.number().int() })
+  .passthrough()
+  .openapi({ description: "A Discord interaction response, in Discord's own format." });

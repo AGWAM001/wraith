@@ -66,6 +66,12 @@ import {
   feesResponseSchema,
   opsFailuresQuerySchema,
   opsFailuresResponseSchema,
+  discordErrorResponseSchema,
+  discordInteractionResponseSchema,
+  discordLinkCodeParamsSchema,
+  discordLinkCodeResponseSchema,
+  discordLinkRequestSchema,
+  discordLinkResponseSchema,
 } from "./schemas";
 
 const registry = new OpenAPIRegistry();
@@ -664,6 +670,72 @@ registry.registerPath({
     401: { description: "Missing or wrong report token", content: { "application/json": { schema: errorResponseSchema } } },
     500: { description: "The fee ledger could not be read", content: { "application/json": { schema: errorResponseSchema } } },
     503: { description: "Fee reporting is not configured on this deployment", content: { "application/json": { schema: errorResponseSchema } } },
+  },
+});
+
+const discordDescription =
+  "Internal endpoint. Not part of the public data API: it belongs to the Veil Discord roles bot. " +
+  "Answers 503 unless the deployment has a Discord application configured. ";
+
+const discordError = (description: string) => ({
+  description,
+  content: { "application/json": { schema: discordErrorResponseSchema } },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/discord/interactions",
+  summary: "Discord interaction callback",
+  description:
+    discordDescription +
+    "Called by Discord when a member uses a command or presses a button. Every request is " +
+    "verified against the application's Ed25519 public key; anything else is answered 401.",
+  "x-internal": true,
+  responses: {
+    200: { description: "Interaction response", content: { "application/json": { schema: discordInteractionResponseSchema } } },
+    400: discordError("Unreadable interaction"),
+    401: discordError("Invalid request signature"),
+    503: discordError("Discord is not configured on this deployment"),
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/discord/link/{code}",
+  summary: "Which Discord member a link code belongs to",
+  description:
+    discordDescription +
+    "Lets the wallet show whose Discord account is about to be linked before the member " +
+    "approves. Returns no wallet address and cannot be used to look one up.",
+  "x-internal": true,
+  request: { params: discordLinkCodeParamsSchema },
+  responses: {
+    200: { description: "OK", content: { "application/json": { schema: discordLinkCodeResponseSchema } } },
+    410: discordError("The code is unknown, used, or has run out"),
+    503: discordError("Discord is not configured on this deployment"),
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/discord/link",
+  summary: "Prove a Veil wallet belongs to a Discord member",
+  description:
+    discordDescription +
+    "The wallet's passkey (and the spending account's key, when sent) sign a statement naming " +
+    "the code, the Discord member and the addresses. The passkey must be a signer the wallet " +
+    "contract lists and the contract must run Veil's wallet code. On success the member's " +
+    "roles are set. The response never contains an address.",
+  "x-internal": true,
+  request: {
+    body: { content: { "application/json": { schema: discordLinkRequestSchema } } },
+  },
+  responses: {
+    200: { description: "Linked", content: { "application/json": { schema: discordLinkResponseSchema } } },
+    400: discordError("An address is missing or not valid"),
+    401: discordError("A signature did not check out, or the address is not a Veil wallet"),
+    410: discordError("The code is unknown, used, or has run out"),
+    503: discordError("Discord is not configured, or the network could not be read"),
   },
 });
 
