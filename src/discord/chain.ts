@@ -193,11 +193,12 @@ export async function holdsVeilian(addresses: readonly string[]): Promise<boolea
     const ids = sold
       .map(Number)
       .filter((id) => Number.isInteger(id) && id >= 1 && id <= VEILIANS_COLLECTION_SIZE);
-    for (const id of ids) {
-      const owner = await simulateRead(contractId, "owner_of", [nativeToScVal(id, { type: "u32" })]);
-      if (typeof owner === "string" && mine.has(owner)) return true;
-    }
-    return false;
+    // All at once: twenty reads one after another is twenty round trips a
+    // member waits through.
+    const owners = await Promise.all(
+      ids.map((id) => simulateRead(contractId, "owner_of", [nativeToScVal(id, { type: "u32" })])),
+    );
+    return owners.some((owner) => typeof owner === "string" && mine.has(owner));
   });
 }
 
