@@ -135,11 +135,24 @@ async function completeLink(config: DiscordConfig, req: Request, res: Response):
     }
 
     const [veil, signers] = await Promise.all([isVeilWallet(wallet), walletSigners(wallet)]);
-    if (veil === null || signers === null) {
-      return fail(res, 503, "chain_unreachable", "The network could not be reached to check the wallet. Try again in a moment.");
-    }
-    if (!veil) {
+    // "Not a Veil wallet" is checked before "could not read": a contract that
+    // is not a Veil wallet has no signer list to read, and telling its owner
+    // to try again in a moment would have them trying forever.
+    if (veil === false) {
       return refuse("not_veil_wallet", "That address is not a wallet made by Veil.");
+    }
+    if (veil === "missing") {
+      logger.warn("discord.link.wallet_missing", {});
+      return fail(
+        res,
+        409,
+        "wallet_not_found",
+        "The network has no record of this wallet right now. If it has not been used for a few months, make any small payment from it first, then try again.",
+      );
+    }
+    if (veil === null || signers === null) {
+      logger.warn("discord.link.chain_unreachable", { codeRead: veil !== null, signersRead: signers !== null });
+      return fail(res, 503, "chain_unreachable", "The network could not be reached to check the wallet. Try again in a moment.");
     }
     if (!signers.includes(publicKey.toString("hex"))) {
       return refuse("not_a_signer", "That passkey is not one of this wallet's keys.");

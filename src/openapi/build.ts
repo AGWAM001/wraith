@@ -734,6 +734,7 @@ registry.registerPath({
     200: { description: "Linked", content: { "application/json": { schema: discordLinkResponseSchema } } },
     400: discordError("An address is missing or not valid"),
     401: discordError("A signature did not check out, or the address is not a Veil wallet"),
+    409: discordError("The network has no record of the wallet (it may have been archived)"),
     410: discordError("The code is unknown, used, or has run out"),
     503: discordError("Discord is not configured, or the network could not be read"),
   },

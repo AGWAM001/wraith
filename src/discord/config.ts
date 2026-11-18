@@ -66,9 +66,25 @@ export function discordNetwork(): Network {
   return parseNetwork(process.env.DISCORD_NETWORK) ?? "mainnet";
 }
 
-/** An RPC endpoint for the bot alone, when the indexer's is not to be shared. */
-export function discordRpcUrl(): string | null {
-  return text("DISCORD_SOROBAN_RPC_URL");
+/** Public mainnet RPC endpoints that need no key. Tried after any configured one. */
+const PUBLIC_MAINNET_RPC_URLS = [
+  "https://soroban-rpc.mainnet.stellar.gateway.fm",
+  "https://rpc.lightsail.network/",
+  "https://mainnet.sorobanrpc.com",
+];
+
+/**
+ * The RPC endpoints the bot reads the chain through, in the order to try them.
+ *
+ * `DISCORD_SOROBAN_RPC_URL` may hold one address or several separated by
+ * commas. On mainnet the public endpoints are always added after them, so the
+ * bot keeps working when the configured one is slow or down. Empty on testnet
+ * with nothing configured: the caller then falls back to the indexer's.
+ */
+export function discordRpcUrls(): string[] {
+  const configured = list("DISCORD_SOROBAN_RPC_URL", []);
+  const fallbacks = discordNetwork() === "mainnet" ? PUBLIC_MAINNET_RPC_URLS : [];
+  return [...new Set([...configured, ...fallbacks])];
 }
 
 export function horizonUrl(): string {

@@ -92,7 +92,11 @@ export async function gatherFacts(member: DiscordMember, now = Date.now()): Prom
   const save: GatheredFacts["save"] = {};
 
   const [veilWallet, veilian, nonce, spendingOps, pullRequests] = await Promise.all([
-    member.wallet ? isVeilWallet(member.wallet) : Promise.resolve(false),
+    // A wallet the network cannot find today is "could not check", which
+    // leaves the role as it is rather than taking it away.
+    member.wallet
+      ? isVeilWallet(member.wallet).then((answer) => (answer === "missing" ? null : answer))
+      : Promise.resolve(false),
     holdsVeilian(addresses),
     member.wallet ? walletNonce(member.wallet) : Promise.resolve(null),
     member.spending ? recentOperationCount(member.spending, now) : Promise.resolve(null),

@@ -263,6 +263,28 @@ describe("POST /discord/link", () => {
     expect(response.body.code).toBe("spending_proof_failed");
   });
 
+  it("says it is not a Veil wallet even when its signer list cannot be read", async () => {
+    // A contract that is not a Veil wallet has no signer list. Answering
+    // "try again in a moment" would have its owner trying forever.
+    const { body } = await signedRequest();
+    chain.isVeilWallet.mockResolvedValue(false);
+    chain.walletSigners.mockResolvedValue(null);
+    const response = await request(app()).post("/discord/link").send(body);
+    expect(response.status).toBe(401);
+    expect(response.body.code).toBe("not_veil_wallet");
+  });
+
+  it("does not call a wallet the network cannot find 'not made by Veil'", async () => {
+    const { code, body } = await signedRequest();
+    chain.isVeilWallet.mockResolvedValue("missing");
+    chain.walletSigners.mockResolvedValue(null);
+    const response = await request(app()).post("/discord/link").send(body);
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe("wallet_not_found");
+    expect(codes.get(code)?.attempts).toBe(0);
+    expect(members.size).toBe(0);
+  });
+
   it("does not charge the code an attempt when the chain cannot be read", async () => {
     const { code, body } = await signedRequest();
     chain.walletSigners.mockResolvedValue(null);
