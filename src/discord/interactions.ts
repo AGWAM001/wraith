@@ -184,17 +184,60 @@ async function githubDoneText(config: DiscordConfig, userId: string): Promise<st
   return `Connected GitHub account **${outcome.login}**.\n${rolesLine(result.granted, result.incomplete)}`;
 }
 
-/** Answer now with a placeholder, then replace it when the work is done. */
-function deferred(config: DiscordConfig, res: Response, token: string, work: () => Promise<string>): void {
+/**
+ * How long a member is left looking at "VEIL is thinking…" before they are
+ * told something. The work carries on behind the message either way.
+ */
+export const DEFERRED_DEADLINE_MS = 45_000;
+
+const STILL_WORKING =
+  "This is taking longer than usual. Your request is still being worked on: press **Refresh roles** in a minute to see the result.";
+
+/**
+ * Answer now with a placeholder, then replace it when the work is done.
+ *
+ * The placeholder is always replaced. Members were left on "VEIL is
+ * thinking…" with no end (2026-11-18) when a chain read behind it hung:
+ * Discord shows that line until the bot says otherwise, and the bot was
+ * waiting on something that never came back. So the work races a deadline,
+ * and whichever finishes first writes the message.
+ */
+function deferred(
+  config: DiscordConfig,
+  res: Response,
+  token: string,
+  work: () => Promise<string>,
+  deadlineMs = DEFERRED_DEADLINE_MS,
+): void {
   res.json({ type: DEFERRED_MESSAGE, data: { flags: EPHEMERAL } });
-  void work()
+
+  let timer: NodeJS.Timeout | undefined;
+  const deadline = new Promise<string>((resolve) => {
+    timer = setTimeout(() => resolve(STILL_WORKING), deadlineMs);
+    timer.unref();
+  });
+  const done = work()
     .catch((error) => {
       logger.warn("discord.interaction.failed", { reason: error instanceof Error ? error.name : "unknown" });
       return "Something went wrong on our side. Nothing was changed. Try again in a moment.";
     })
-    .then((content) => editInteractionReply(config, token, { content }))
-    .catch(() => undefined);
+    .finally(() => clearTimeout(timer));
+
+  const reply = (content: string) =>
+    editInteractionReply(config, token, { content }).catch((error) => {
+      logger.warn("discord.interaction.reply_failed", { reason: error instanceof Error ? error.message : "unknown" });
+    });
+
+  void Promise.race([done, deadline]).then(async (first) => {
+    await reply(first);
+    // When the deadline won, the real answer still replaces the holding
+    // message once it arrives, for as long as Discord accepts edits.
+    if (first === STILL_WORKING) await reply(await done);
+  });
 }
+
+/** Test-only handle on the deferred helper. */
+export const _deferred = deferred;
 
 async function handle(config: DiscordConfig, interaction: Interaction, res: Response): Promise<void> {
   if (interaction.type === PING) {
