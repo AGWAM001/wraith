@@ -11,6 +11,8 @@
  * and they stay correct whether or not the indexer is watching the contract.
  */
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 import {
   Account,
   Address,
@@ -27,7 +29,7 @@ import {
 import { getRpc } from "../rpc";
 import {
   discordNetwork,
-  discordRpcUrl,
+  discordRpcUrls,
   horizonUrl,
   namesContractId,
   veiliansContractId,
@@ -42,16 +44,51 @@ const VEILIANS_COLLECTION_SIZE = 20;
 /** `NameState::Active` in the registry contract. */
 const NAME_STATE_ACTIVE = 0;
 
-let ownClient: { url: string; server: RPC.Server } | null = null;
+/** One slow endpoint must not use up the whole of a member's wait. */
+const RPC_TIMEOUT_MS = 8_000;
+
+const clients = new Map<string, RPC.Server>();
+
+function clientFor(url: string): RPC.Server {
+  let client = clients.get(url);
+  if (!client) {
+    client = new RPC.Server(url, { allowHttp: url.startsWith("http://"), timeout: RPC_TIMEOUT_MS });
+    clients.set(url, client);
+  }
+  return client;
+}
+
+/**
+ * The endpoints to try, in order. A member linking a wallet waits on these
+ * reads, and a single endpoint having a bad moment used to be reported to them
+ * as "the network could not be reached" (2026-11-18, a real member, first
+ * day). So there is always more than one.
+ */
+function servers(): RPC.Server[] {
+  const list = discordRpcUrls().map(clientFor);
+  if (list.length > 0) return list;
+  try {
+    return [getRpc(discordNetwork())];
+  } catch {
+    return [];
+  }
+}
+
+/** The endpoint the current read is using. Set per read by {@link attempt}. */
+const activeServer = new AsyncLocalStorage<RPC.Server>();
 
 function rpc(): RPC.Server {
-  const url = discordRpcUrl();
-  if (!url) return getRpc(discordNetwork());
-  if (!ownClient || ownClient.url !== url) {
-    ownClient = { url, server: new RPC.Server(url, { allowHttp: url.startsWith("http://") }) };
-  }
-  return ownClient.server;
+  const server = activeServer.getStore();
+  if (!server) throw new Error("no RPC endpoint for this read");
+  return server;
 }
+
+/**
+ * The chain answered, and the answer was a failure: the contract has no such
+ * function, or is not there. Asking another endpoint would get the same
+ * answer, so this is not retried.
+ */
+class ChainSaidNo extends Error {}
 
 function passphrase(): string {
   return discordNetwork() === "mainnet" ? Networks.PUBLIC : Networks.TESTNET;
@@ -70,15 +107,29 @@ async function simulateRead(contractId: string, method: string, args: xdr.ScVal[
   if (RPC.Api.isSimulationSuccess(response) && response.result) {
     return scValToNative(response.result.retval);
   }
-  throw new Error(`simulation of ${method} failed`);
+  if (RPC.Api.isSimulationError(response)) throw new ChainSaidNo(`simulation of ${method} failed`);
+  throw new Error(`simulation of ${method} gave no result`);
 }
 
+/**
+ * Run one read, trying each endpoint in turn until one answers. Null only
+ * when every endpoint failed, or the chain itself said no.
+ */
 async function attempt<T>(read: () => Promise<T>): Promise<T | null> {
-  try {
-    return await read();
-  } catch {
-    return null;
+  for (const server of servers()) {
+    try {
+      return await activeServer.run(server, read);
+    } catch (error) {
+      if (error instanceof ChainSaidNo) return null;
+      // A timeout or a refused connection. The next endpoint may be fine.
+    }
   }
+  return null;
+}
+
+/** Test-only: forget cached RPC clients. */
+export function _resetChainClients(): void {
+  clients.clear();
 }
 
 export function isContractAddress(value: unknown): value is string {
@@ -93,13 +144,18 @@ export function isAccountAddress(value: unknown): value is string {
  * Whether this contract runs Veil's wallet code.
  *
  * Compared by code hash, which is exact: a contract that merely behaves like a
- * Veil wallet has a different hash. `false` covers "no such contract" too.
+ * Veil wallet has a different hash.
+ *
+ * `"missing"` when the network returns no entry for the address at all. That
+ * is not the same as "not a Veil wallet": it is also what a real wallet looks
+ * like once it has gone unused long enough for the network to archive it, and
+ * calling that wallet "not made by Veil" would be wrong.
  */
-export async function isVeilWallet(wallet: string): Promise<boolean | null> {
-  return attempt(async () => {
+export async function isVeilWallet(wallet: string): Promise<boolean | "missing" | null> {
+  return attempt<boolean | "missing">(async () => {
     const result = await rpc().getLedgerEntries(new Contract(wallet).getFootprint());
     const entry = result.entries[0];
-    if (!entry) return false;
+    if (!entry) return "missing";
     const executable = entry.val.contractData().val().instance().executable();
     if (executable.switch().name !== "contractExecutableWasm") return false;
     return walletWasmHashes().includes(Buffer.from(executable.wasmHash()).toString("hex"));

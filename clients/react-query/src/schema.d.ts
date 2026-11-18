@@ -4149,6 +4149,18 @@ export interface paths {
                         };
                     };
                 };
+                /** @description The network has no record of the wallet (it may have been archived) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
                 /** @description The code is unknown, used, or has run out */
                 410: {
                     headers: {
