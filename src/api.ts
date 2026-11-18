@@ -15,6 +15,8 @@ import { createLinqWebhookRouter } from "./api/linqWebhook";
 import { createOfframpRouter } from "./api/offramp";
 import { createNgnRouter } from "./api/ngn";
 import { createOpsRouter } from "./api/ops";
+import { createDiscordInteractionsRouter } from "./discord/interactions";
+import { createDiscordLinkRouter } from "./discord/link";
 import { feesRouter } from "./api/fees";
 import { createGraphQLMiddleware } from "./graphql/server";
 import { createPopularAssetsRouter } from "./routes/assets/popular";
@@ -203,6 +205,10 @@ export function createApp(): express.Application {
   // specifically, and it is silent when wrong: the route works, the signature
   // simply never matches.
   app.use("/webhooks/linq", createLinqWebhookRouter());
+  // Also before express.json(), for the same reason: Discord signs the raw
+  // body of every interaction. Above the rate limiter too, since every call
+  // arrives from Discord's own addresses and would share one bucket.
+  app.use("/discord/interactions", createDiscordInteractionsRouter());
 
   app.use(express.json());
   app.use(jsonApiMiddleware);
@@ -294,6 +300,8 @@ export function createApp(): express.Application {
   // Operator surface: what broke, without database access. Token-gated by
   // OPS_TOKEN; see .env.example.
   app.use("/ops", createOpsRouter());
+  // Linking a Veil wallet to a Discord member (src/discord). 503 unless configured.
+  app.use("/discord", createDiscordLinkRouter());
   // What the client should charge, and where to send it. Server-held so the
   // amount is never compiled into an APK.
   app.use("/fees", feesRouter());
