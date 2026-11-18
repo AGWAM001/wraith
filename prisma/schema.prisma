@@ -685,6 +685,10 @@ model DiscordLinkCode {
   usedAt          DateTime?
   // Failed proofs against this code. A code that keeps failing is retired.
   attempts        Int       @default(0)
+  // Discord's token for the private message that showed this code, so that
+  // message can be changed to "linked" when the proof arrives. Discord stops
+  // honouring it after fifteen minutes, and it is cleared once used.
+  interactionToken String?
   createdAt       DateTime  @default(now())
 
   @@index([discordUserId])
