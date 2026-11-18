@@ -20,6 +20,7 @@ interface CodeRow {
   expiresAt: Date;
   usedAt: Date | null;
   attempts: number;
+  interactionToken?: string | null;
 }
 interface MemberRow {
   discordUserId: string;
@@ -93,6 +94,12 @@ jest.mock("../../discord/chain", () => ({
   walletSigners: (...args: unknown[]) => chain.walletSigners(...args),
 }));
 
+const editInteractionReply = jest.fn();
+jest.mock("../../discord/discordApi", () => ({
+  ...jest.requireActual("../../discord/discordApi"),
+  editInteractionReply: (...args: unknown[]) => editInteractionReply(...args),
+}));
+
 const syncMember = jest.fn();
 jest.mock("../../discord/sync", () => ({
   syncMember: (...args: unknown[]) => syncMember(...args),
@@ -163,6 +170,7 @@ beforeEach(() => {
   configure();
   chain.isVeilWallet.mockResolvedValue(true);
   syncMember.mockResolvedValue({ granted: ["Veil Wallet"], incomplete: false, inServer: true });
+  editInteractionReply.mockResolvedValue(undefined);
 });
 
 afterAll(() => {
@@ -282,6 +290,39 @@ describe("POST /discord/link", () => {
     expect(members.get(USER)?.wallet).toBe(WALLET);
   });
 
+  it("turns the member's Discord message into the result", async () => {
+    const { passkey, code, body } = await signedRequest();
+    codes.get(code)!.interactionToken = "interaction-token";
+    chain.walletSigners.mockResolvedValue([passkey.publicKey.toString("hex")]);
+
+    await request(app()).post("/discord/link").send(body);
+
+    expect(editInteractionReply).toHaveBeenCalledTimes(1);
+    const [, token, message] = editInteractionReply.mock.calls[0];
+    expect(token).toBe("interaction-token");
+    expect(message.content).toBe("**Wallet linked.**\nYour roles: **Veil Wallet**.");
+    // The button that has done its job is taken away.
+    expect(message.components).toEqual([]);
+  });
+
+  it("links all the same when Discord will not take the message edit", async () => {
+    const { passkey, code, body } = await signedRequest();
+    codes.get(code)!.interactionToken = "interaction-token";
+    chain.walletSigners.mockResolvedValue([passkey.publicKey.toString("hex")]);
+    editInteractionReply.mockRejectedValue(new Error("token expired"));
+    const response = await request(app()).post("/discord/link").send(body);
+    expect(response.status).toBe(200);
+    expect(members.get(USER)?.wallet).toBe(WALLET);
+  });
+
+  it("does not try to edit a message for a failed proof", async () => {
+    const { code, body } = await signedRequest();
+    codes.get(code)!.interactionToken = "interaction-token";
+    chain.walletSigners.mockResolvedValue([]);
+    await request(app()).post("/discord/link").send(body);
+    expect(editInteractionReply).not.toHaveBeenCalled();
+  });
+
   it("still reports the link when setting roles fails", async () => {
     const { passkey, body } = await signedRequest();
     chain.walletSigners.mockResolvedValue([passkey.publicKey.toString("hex")]);
@@ -349,7 +390,11 @@ describe("POST /discord/interactions", () => {
     expect(response.body.type).toBe(4);
     expect(response.body.data.flags).toBe(64);
     const [code] = [...codes.keys()];
-    expect(codes.get(code)).toMatchObject({ discordUserId: USER, discordUsername: "ada" });
+    expect(codes.get(code)).toMatchObject({
+      discordUserId: USER,
+      discordUsername: "ada",
+      interactionToken: "interaction-token",
+    });
     expect(response.body.data.content).toContain(`${code.slice(0, 4)}-${code.slice(4)}`);
     expect(response.body.data.components[0].components[0].url).toBe(
       `https://app.useveilapp.xyz/link-discord?code=${code}`,

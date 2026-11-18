@@ -17,6 +17,7 @@ import { prisma } from "../db";
 import { logger } from "../logger";
 import { isAccountAddress, isContractAddress, isVeilWallet, walletSigners } from "./chain";
 import { discordConfig, discordNetwork, passkeyRpId, type DiscordConfig } from "./config";
+import { editInteractionReply } from "./discordApi";
 import {
   linkChallenge,
   newLinkCode,
@@ -32,7 +33,12 @@ const MAX_NAMES = 10;
 const NAME_PATTERN = /^[a-z0-9_]{3,20}$/;
 
 /** Make a code for this member, replacing any they have not used yet. */
-export async function createLinkCode(discordUserId: string, discordUsername: string, now = Date.now()): Promise<string> {
+export async function createLinkCode(
+  discordUserId: string,
+  discordUsername: string,
+  interactionToken: string | null = null,
+  now = Date.now(),
+): Promise<string> {
   await prisma.discordLinkCode.deleteMany({
     where: { OR: [{ discordUserId, usedAt: null }, { expiresAt: { lt: new Date(now - 24 * 60 * 60 * 1000) } }] },
   });
@@ -40,7 +46,13 @@ export async function createLinkCode(discordUserId: string, discordUsername: str
     const code = newLinkCode(randomInt);
     try {
       await prisma.discordLinkCode.create({
-        data: { code, discordUserId, discordUsername: discordUsername.slice(0, 64), expiresAt: new Date(now + CODE_TTL_MS) },
+        data: {
+          code,
+          discordUserId,
+          discordUsername: discordUsername.slice(0, 64),
+          expiresAt: new Date(now + CODE_TTL_MS),
+          interactionToken,
+        },
       });
       return code;
     } catch {
@@ -150,7 +162,7 @@ async function completeLink(config: DiscordConfig, req: Request, res: Response):
   const displaced = await prisma.$transaction(async (tx) => {
     const spent = await tx.discordLinkCode.updateMany({
       where: { code: row.code, usedAt: null },
-      data: { usedAt: new Date(now) },
+      data: { usedAt: new Date(now), interactionToken: null },
     });
     if (spent.count !== 1) return null;
 
@@ -208,6 +220,20 @@ async function completeLink(config: DiscordConfig, req: Request, res: Response):
   for (const otherId of displaced) {
     const other = await prisma.discordMember.findUnique({ where: { discordUserId: otherId } });
     if (other) void syncMember(config, other).catch(() => undefined);
+  }
+
+  // Turn the "tap to link" message in Discord into the result, so the member
+  // is not left looking at a button that has already done its job. Best
+  // effort: the link is saved whether or not Discord takes the edit.
+  if (row.interactionToken) {
+    const lines = [
+      "**Wallet linked.**",
+      roles.length > 0 ? `Your roles: **${roles.join("**, **")}**.` : "You have no Veil roles yet.",
+      ...(incomplete ? ["Some checks could not be finished just now; they will be tried again."] : []),
+    ];
+    void editInteractionReply(config, row.interactionToken, { content: lines.join("\n"), components: [] }).catch(
+      () => undefined,
+    );
   }
 
   res.json({ linked: true, discordUsername: row.discordUsername, roles, incomplete, inServer });

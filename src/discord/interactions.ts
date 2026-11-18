@@ -90,8 +90,8 @@ function panel(): Reply {
   };
 }
 
-async function verifyReply(userId: string, username: string): Promise<Reply> {
-  const code = await createLinkCode(userId, username);
+async function verifyReply(userId: string, username: string, token: string): Promise<Reply> {
+  const code = await createLinkCode(userId, username, token);
   const minutes = Math.round(CODE_TTL_MS / 60_000);
   return ephemeral(
     [
@@ -223,7 +223,7 @@ async function handle(config: DiscordConfig, interaction: Interaction, res: Resp
       res.json({ type: MESSAGE, data: panel() });
       return;
     case "verify":
-      res.json({ type: MESSAGE, data: await verifyReply(userId, username) });
+      res.json({ type: MESSAGE, data: await verifyReply(userId, username, token) });
       return;
     case "github":
       res.json({ type: MESSAGE, data: await githubReply(userId) });
