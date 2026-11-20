@@ -262,7 +262,19 @@ describe("the metrics", () => {
     const text = await renderMetrics();
     expect(text).toMatch(/discord_member_checks_total\{outcome="checked"\} 1/);
     expect(text).toMatch(/discord_member_checks_total\{outcome="failed"\} 1/);
+    // Nothing was left over, but the series still exists at zero so a
+    // dashboard can tell "no skips" from "no data".
+    expect(text).toMatch(/discord_member_checks_total\{outcome="skipped"\} 0/);
     expect(text).toContain("discord_oldest_unchecked_age_seconds");
+  });
+
+  it("exports every outcome from the first scrape, even with nothing due", async () => {
+    await recheckAll(noPause);
+
+    const text = await renderMetrics();
+    for (const outcome of ["checked", "failed", "skipped"]) {
+      expect(text).toMatch(new RegExp(`discord_member_checks_total\\{outcome="${outcome}"\\} 0`));
+    }
   });
 
   it("counts the members a full run could not reach as skipped", async () => {

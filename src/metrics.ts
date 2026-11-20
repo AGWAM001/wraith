@@ -552,7 +552,9 @@ export const discordOldestUncheckedAgeSeconds = new Gauge({
 
 /** Record Discord role checks under a fixed outcome word. */
 export function recordDiscordChecks(outcome: "checked" | "failed" | "skipped", count = 1): void {
-  if (count <= 0) return;
+  // Zero is recorded on purpose: prom-client only exports a labelled counter
+  // once that label combination has been touched, and a dashboard needs the
+  // series to exist at zero to show "no failures" rather than "no data".
   discordMemberChecksTotal.inc({ outcome }, count);
 }
 
