@@ -950,6 +950,11 @@ else {
   /**
    * Aggregate token stats for `address`, grouped by contractId.
    *
+   * Computed over the transfer rows, which is what makes the date window below
+   * mean something. `GET /accounts/:address/summary` is the other question —
+   * one all-time row per asset, read from the materialised rollup — and it
+   * refuses these two parameters rather than ignoring them.
+   *
    * Query params:
    *   contractId  — filter to a specific token contract
    *   fromDate    — ISO 8601 inclusive lower bound on ledgerClosedAt
@@ -1004,8 +1009,10 @@ else {
       }
     };
 
+  // Only this path. `/accounts/:address/summary` is the accounts router's, which
+  // mounts first and answers a different question (all-time, per asset); this
+  // second registration sat below it and could never run.
   app.get("/summary/:address", summaryHandler);
-  app.get("/accounts/:address/summary", summaryHandler);
 
   // ─── GET /host-fn/:contractId ────────────────────────────────────────────
   /**
