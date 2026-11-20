@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
 import { jsonApiMiddleware } from "./middleware/jsonapi";
 import { createCorsMiddleware } from "./middleware/cors";
+import { requestId, type RequestWithId } from "./middleware/requestId";
 import { queryHostFnLogs } from "./indexer/host-fn-log";
 import { queryTransfers, queryAllTransfers, queryByTxHash, querySummary, queryNftTransfers, getNftOwner, getNftMetadata, getLastIndexedLedger, prisma } from "./db";
 import { getLatestLedger } from "./rpc";
@@ -143,6 +144,15 @@ export function createApp(): express.Application {
   // person got "too many requests" for no reason of their own. One hop: trust
   // Render's X-Forwarded-For, nothing further back.
   app.set("trust proxy", 1);
+
+  // ─── Request id ───────────────────────────────────────────────────────────
+  // First, above everything that can answer: the two raw-body routers, CORS,
+  // the limiter, and the error handler at the bottom. An id that started after
+  // a router would leave the requests that router refuses — and every log line
+  // it wrote — without one, which is exactly the report a person files.
+  // It reads a header and writes a header, so it is safe above `express.json()`
+  // and above the signature-verifying webhook routes.
+  app.use(requestId);
 
   // ─── HTTP metrics middleware ──────────────────────────────────────────────
   // First in the chain, deliberately: mounted below networkMiddleware and the
@@ -1155,7 +1165,7 @@ else {
   });
 
   // ─── Global error handler ────────────────────────────────────────────────
-  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     // A deliberately-thrown HttpError carries a message written for the caller,
     // so it keeps its own status and text.
     if (err instanceof HttpError) {
@@ -1168,7 +1178,12 @@ else {
     // handler used to answer `err.message` verbatim, which is how a Postgres
     // connection string reached callers through a raw driver error. The caller
     // gets a correlation id; the detail stays in the log.
-    const correlationId = newCorrelationId();
+    //
+    // The id is the one the request already has, not a fresh one: a person
+    // reporting a failed cash-out quotes the id on the screen, and the provider
+    // call that failed wrote its log lines under that same id. Minting a second
+    // id here meant the report and the logs never met.
+    const correlationId = (req as RequestWithId).requestId ?? newCorrelationId();
     console.error(`[api] Unhandled error (${correlationId}):`, err);
 
     return res.status(500).json({

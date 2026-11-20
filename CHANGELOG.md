@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - CI pipeline (`.github/workflows/ci.yml`) running Prisma generate, typecheck, and build on every PR
 - Contributor documentation, issue templates, PR template
 - This changelog
+- `x-request-id` — every response now carries one, and every log line written while handling that request carries the same id. A caller's own id is honoured if it is printable ASCII of 128 characters or fewer; anything else is replaced with a fresh one. `X-Request-Id` is in the CORS `Access-Control-Expose-Headers` list on the surfaces that send CORS headers, and the `correlationId` a 500 returns is the request's id rather than a second, unrelated one.
 - `CORS_ALLOWED_ORIGINS` — the comma-separated list of browser origins allowed to call the surfaces that are not public. A new client is an environment change, not a change to the source.
 
 ### Changed
