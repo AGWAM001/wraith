@@ -735,16 +735,42 @@ export const offrampOrderBodySchema = z
   .passthrough();
 
 export const offrampOrderStatus = z
-  .enum(["pending", "waiting_for_deposit", "processing", "completed", "failed", "expired"])
-  .openapi({ description: "Client-facing status mapped from the provider's raw one." });
+  .string()
+  .openapi({
+    description:
+      "Client-facing status. The server sends the provider's own word (e.g. `initiated`, " +
+      "`processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), " +
+      "sometimes with a suffix appended for older wallet builds that only recognise a small " +
+      "vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal " +
+      "becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. " +
+      "Do not match on this field exhaustively; test for containment of the word the screen " +
+      "acts on (e.g. `status.includes('failed')`).",
+    example: "settled",
+  });
 
 export const offrampOrderResponseSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    description:
+      "Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). " +
+      "Never the provider's internal id.",
+    example: "ofr_<22 URL-safe characters>",
+  }),
+  accessToken: z.string().openapi({
+    description:
+      "Bearer credential that authorises reading this order. Format: `oft_` followed by " +
+      "43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. " +
+      "On a replay the previous token is invalidated and a new one is issued.",
+    example: "oft_<43 URL-safe characters>",
+  }),
   walletAddress: z.string().openapi({ description: "Deposit address the stablecoin is sent to." }),
   chain: z.string(),
   coin: z.string(),
-  amountStableCoin: z.number(),
-  amountNGN: z.number(),
+  amountStableCoin: z.union([z.number(), z.string()]).openapi({
+    description: "Stablecoin amount. The server accepts and may echo a plain decimal string.",
+  }),
+  amountNGN: z.union([z.number(), z.string()]).openapi({
+    description: "Naira amount. The server accepts and may echo a plain decimal string.",
+  }),
   rate: z.number(),
   status: offrampOrderStatus,
   providerStatus: z.string().optional().openapi({ description: "Raw provider status, when the order is not a replay." }),
@@ -760,8 +786,12 @@ export const offrampOrderStatusResponseSchema = z.object({
   id: z.string(),
   status: offrampOrderStatus,
   providerStatus: z.string(),
-  amountStableCoin: z.number(),
-  amountNGN: z.number(),
+  amountStableCoin: z.union([z.number(), z.string()]).openapi({
+    description: "Stablecoin amount. Numeric when live; may be a decimal string when served from cache.",
+  }),
+  amountNGN: z.union([z.number(), z.string()]).openapi({
+    description: "Naira amount. Numeric when live; may be a decimal string when served from cache.",
+  }),
   depositAddress: z.string(),
   rate: z.number(),
   createdAt: z.string().datetime({ offset: true }),

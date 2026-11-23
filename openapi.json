@@ -5908,11 +5908,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -5926,11 +5937,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -5973,11 +5995,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6115,11 +6148,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6133,11 +6177,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6180,11 +6235,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6302,11 +6368,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6320,11 +6397,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6367,11 +6455,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6508,7 +6607,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). Never the provider's internal id.",
+                      "example": "ofr_<22 URL-safe characters>"
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "description": "Bearer credential that authorises reading this order. Format: `oft_` followed by 43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. On a replay the previous token is invalidated and a new one is issued.",
+                      "example": "oft_<43 URL-safe characters>"
                     },
                     "walletAddress": {
                       "type": "string",
@@ -6521,25 +6627,34 @@
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Stablecoin amount. The server accepts and may echo a plain decimal string."
                     },
                     "amountNGN": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Naira amount. The server accepts and may echo a plain decimal string."
                     },
                     "rate": {
                       "type": "number"
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "pending",
-                        "waiting_for_deposit",
-                        "processing",
-                        "completed",
-                        "failed",
-                        "expired"
-                      ],
-                      "description": "Client-facing status mapped from the provider's raw one."
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "example": "settled"
                     },
                     "providerStatus": {
                       "type": "string",
@@ -6551,6 +6666,7 @@
                   },
                   "required": [
                     "id",
+                    "accessToken",
                     "walletAddress",
                     "chain",
                     "coin",
@@ -6571,7 +6687,14 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). Never the provider's internal id.",
+                      "example": "ofr_<22 URL-safe characters>"
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "description": "Bearer credential that authorises reading this order. Format: `oft_` followed by 43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. On a replay the previous token is invalidated and a new one is issued.",
+                      "example": "oft_<43 URL-safe characters>"
                     },
                     "walletAddress": {
                       "type": "string",
@@ -6584,25 +6707,34 @@
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Stablecoin amount. The server accepts and may echo a plain decimal string."
                     },
                     "amountNGN": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Naira amount. The server accepts and may echo a plain decimal string."
                     },
                     "rate": {
                       "type": "number"
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "pending",
-                        "waiting_for_deposit",
-                        "processing",
-                        "completed",
-                        "failed",
-                        "expired"
-                      ],
-                      "description": "Client-facing status mapped from the provider's raw one."
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "example": "settled"
                     },
                     "providerStatus": {
                       "type": "string",
@@ -6614,6 +6746,7 @@
                   },
                   "required": [
                     "id",
+                    "accessToken",
                     "walletAddress",
                     "chain",
                     "coin",
@@ -6634,11 +6767,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6652,11 +6796,51 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency conflict — same key but different request details (code: idempotency_conflict)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6699,11 +6883,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6775,6 +6970,11 @@
         "summary": "Get the status of a cash-out order",
         "description": "Internal endpoint. Not part of the public data API: (provider callback / wallet-only cash-out surface served on behalf of the Veil wallet client).",
         "x-internal": true,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -6799,24 +6999,33 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "pending",
-                        "waiting_for_deposit",
-                        "processing",
-                        "completed",
-                        "failed",
-                        "expired"
-                      ],
-                      "description": "Client-facing status mapped from the provider's raw one."
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "example": "settled"
                     },
                     "providerStatus": {
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Stablecoin amount. Numeric when live; may be a decimal string when served from cache."
                     },
                     "amountNGN": {
-                      "type": "number"
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Naira amount. Numeric when live; may be a decimal string when served from cache."
                     },
                     "depositAddress": {
                       "type": "string"
@@ -6859,11 +7068,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
@@ -6899,25 +7119,36 @@
             }
           },
           "404": {
-            "description": "Not Found",
+            "description": "Unknown order id, malformed id, or token that does not match (code: order_not_found)",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }
             }
           },
           "429": {
-            "description": "Rate limited (this deployment's or the provider's — the `code` says which)",
+            "description": "Too many failed lookups from this IP (code: veil_rate_limited)",
             "content": {
               "application/json": {
                 "schema": {
@@ -6953,11 +7184,22 @@
                   "type": "object",
                   "properties": {
                     "error": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prose for a person. Never branch on it — it changes when the provider rewords an error."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.",
+                      "example": "coin_not_available"
+                    },
+                    "retryAfterSeconds": {
+                      "type": "number",
+                      "description": "On a provider 429 only: how long the shared limit asks you to wait."
                     }
                   },
                   "required": [
-                    "error"
+                    "error",
+                    "code"
                   ]
                 }
               }

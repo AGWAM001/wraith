@@ -3055,7 +3055,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3066,7 +3074,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3096,7 +3112,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3200,7 +3224,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3211,7 +3243,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3241,7 +3281,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3333,7 +3381,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3344,7 +3400,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3374,7 +3438,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3471,19 +3543,30 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /**
+                             * @description Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). Never the provider's internal id.
+                             * @example ofr_<22 URL-safe characters>
+                             */
                             id: string;
+                            /**
+                             * @description Bearer credential that authorises reading this order. Format: `oft_` followed by 43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. On a replay the previous token is invalidated and a new one is issued.
+                             * @example oft_<43 URL-safe characters>
+                             */
+                            accessToken: string;
                             /** @description Deposit address the stablecoin is sent to. */
                             walletAddress: string;
                             chain: string;
                             coin: string;
-                            amountStableCoin: number;
-                            amountNGN: number;
+                            /** @description Stablecoin amount. The server accepts and may echo a plain decimal string. */
+                            amountStableCoin: number | string;
+                            /** @description Naira amount. The server accepts and may echo a plain decimal string. */
+                            amountNGN: number | string;
                             rate: number;
                             /**
-                             * @description Client-facing status mapped from the provider's raw one.
-                             * @enum {string}
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @example settled
                              */
-                            status: "pending" | "waiting_for_deposit" | "processing" | "completed" | "failed" | "expired";
+                            status: string;
                             /** @description Raw provider status, when the order is not a replay. */
                             providerStatus?: string;
                             replayed?: boolean;
@@ -3497,19 +3580,30 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /**
+                             * @description Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). Never the provider's internal id.
+                             * @example ofr_<22 URL-safe characters>
+                             */
                             id: string;
+                            /**
+                             * @description Bearer credential that authorises reading this order. Format: `oft_` followed by 43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. On a replay the previous token is invalidated and a new one is issued.
+                             * @example oft_<43 URL-safe characters>
+                             */
+                            accessToken: string;
                             /** @description Deposit address the stablecoin is sent to. */
                             walletAddress: string;
                             chain: string;
                             coin: string;
-                            amountStableCoin: number;
-                            amountNGN: number;
+                            /** @description Stablecoin amount. The server accepts and may echo a plain decimal string. */
+                            amountStableCoin: number | string;
+                            /** @description Naira amount. The server accepts and may echo a plain decimal string. */
+                            amountNGN: number | string;
                             rate: number;
                             /**
-                             * @description Client-facing status mapped from the provider's raw one.
-                             * @enum {string}
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @example settled
                              */
-                            status: "pending" | "waiting_for_deposit" | "processing" | "completed" | "failed" | "expired";
+                            status: string;
                             /** @description Raw provider status, when the order is not a replay. */
                             providerStatus?: string;
                             replayed?: boolean;
@@ -3523,7 +3617,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3534,7 +3636,34 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
+                        };
+                    };
+                };
+                /** @description Idempotency conflict — same key but different request details (code: idempotency_conflict) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
+                            error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3564,7 +3693,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3645,13 +3782,15 @@ export interface paths {
                         "application/json": {
                             id: string;
                             /**
-                             * @description Client-facing status mapped from the provider's raw one.
-                             * @enum {string}
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @example settled
                              */
-                            status: "pending" | "waiting_for_deposit" | "processing" | "completed" | "failed" | "expired";
+                            status: string;
                             providerStatus: string;
-                            amountStableCoin: number;
-                            amountNGN: number;
+                            /** @description Stablecoin amount. Numeric when live; may be a decimal string when served from cache. */
+                            amountStableCoin: number | string;
+                            /** @description Naira amount. Numeric when live; may be a decimal string when served from cache. */
+                            amountNGN: number | string;
                             depositAddress: string;
                             rate: number;
                             /** Format: date-time */
@@ -3668,7 +3807,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
@@ -3691,18 +3838,26 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not Found */
+                /** @description Unknown order id, malformed id, or token that does not match (code: order_not_found) */
                 404: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
-                /** @description Rate limited (this deployment's or the provider's — the `code` says which) */
+                /** @description Too many failed lookups from this IP (code: veil_rate_limited) */
                 429: {
                     headers: {
                         [name: string]: unknown;
@@ -3728,7 +3883,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Prose for a person. Never branch on it — it changes when the provider rewords an error. */
                             error: string;
+                            /**
+                             * @description Stable machine-readable reason. Provider codes arrive verbatim; wraith-assigned codes are catalogued in docs/ngn-rails.md.
+                             * @example coin_not_available
+                             */
+                            code: string;
+                            /** @description On a provider 429 only: how long the shared limit asks you to wait. */
+                            retryAfterSeconds?: number;
                         };
                     };
                 };
