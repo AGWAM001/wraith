@@ -13,6 +13,8 @@ import {
 } from "../db";
 import { upsertHostFnLogs, parseHostFnEvent, type HostFnRecord } from "../indexer/host-fn-log";
 import { isNftTransferEvent, parseNftEvents } from "../ingester/nft";
+import type { Network } from "../network";
+import { resolveNetwork } from "../network";
 
 const DEFAULT_CHUNK_SIZE = 64;
 const DEFAULT_CONCURRENCY = 4;
@@ -21,6 +23,7 @@ const BATCH_SIZE = parseInt(process.env.EVENTS_BATCH_SIZE ?? "10000", 10);
 export interface BackfillOptions {
   fromLedger: number;
   toLedger: number;
+  network?: Network;
   chunkSize?: number;
   concurrency?: number;
   signal?: AbortSignal;
@@ -71,6 +74,7 @@ async function processChunk(
   chunk: Chunk,
   contracts: string[],
   source: SourceSwitcher,
+  network: Network,
   signal?: AbortSignal,
 ): Promise<number> {
   if (signal?.aborted) return 0;
@@ -96,7 +100,7 @@ async function processChunk(
 
   if (fungible.length > 0) {
     try {
-      const records = parseEvents(fungible);
+      const records = parseEvents(fungible, network);
       if (records.length > 0) {
         const inserted = await upsertTransfers(records);
         totalInserted += inserted;
@@ -138,6 +142,7 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
   const {
     fromLedger,
     toLedger,
+    network,
     chunkSize = DEFAULT_CHUNK_SIZE,
     concurrency = DEFAULT_CONCURRENCY,
     signal,
@@ -145,6 +150,11 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
   } = options;
 
   validateNetworkConfig();
+
+  // Resolve the network once up-front: every chunk inherits it, so a backfill
+  // triggered for mainnet cannot accidentally write events under testnet just
+  // because STELLAR_NETWORK changed between chunks.
+  const net = resolveNetwork(network);
 
   const contracts = resolveContractIds();
 
@@ -201,7 +211,7 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
     const wave = chunks.slice(i, i + concurrency);
     const results = await Promise.all(
       wave.map((c) =>
-        processChunk(c, contracts, source, signal).catch((err) => {
+        processChunk(c, contracts, source, net, signal).catch((err) => {
           console.error(`[backfill] Chunk ${c.start}-${c.end} failed:`, err);
           return 0;
         }),
