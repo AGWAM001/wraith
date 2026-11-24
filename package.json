@@ -18,6 +18,7 @@
     "db:studio": "prisma studio",
     "docs": "typedoc",
     "docs:openapi": "ts-node src/openapi/build.ts",
+    "graphql:persist": "ts-node scripts/persist-graphql-queries.ts",
     "backfill:summaries": "ts-node scripts/backfill-account-summaries.ts",
     "backfill": "ts-node src/cli.ts backfill",
     "bench": "ts-node --project bench/tsconfig.json bench/insert.bench.ts",
