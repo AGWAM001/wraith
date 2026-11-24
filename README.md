@@ -203,6 +203,19 @@ npm run db:seed
 
 ***
 
+## Testing
+
+| Command | What it does |
+| ------- | ------------ |
+| `npm test` | Runs the unit suite. No coverage is collected, so it is the fastest full run and does **not** check the coverage floor. |
+| `npm run test:coverage` | The command CI runs. Collects coverage over `src/**/*.ts` — including source files no test imports, which then show at 0% — and fails if the global floor is not met. |
+| `npx jest src/__tests__/decoder.test.ts` | Runs a single test file quickly. No coverage, no floor — just the one file. |
+| `npm run test:watch` | Interactive watch mode. No coverage. |
+| `npm run test:integration` | Docker-based integration suite (separate config; needs the `docker compose -f docker-compose.test.yml` stack). |
+| `npm run test:chaos` | Chaos suite, also Docker-based. |
+
+***
+
 ## API Documentation
 
 ### REST API Specification
