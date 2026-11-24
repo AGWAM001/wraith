@@ -212,7 +212,7 @@ function buildSubscriptionSchema(): GraphQLSchema {
           // by network or a subscriber gets the other chain's rows (#163).
           const net = subscriptionNetwork(args.network, ctx);
           return filterAsyncIterator<TransferEvent>(
-            eventsToAsyncIterator<TransferEvent>(transferEmitter, "transfer:new"),
+            eventsToAsyncIterator<TransferEvent>(transferEmitter, "transfer:new", { channel: "transfer" }),
             (t) => t.network === net && (!args.contractId || t.contractId === args.contractId)
           );
         },
@@ -231,7 +231,7 @@ function buildSubscriptionSchema(): GraphQLSchema {
         subscribe: (_parent, args: { contractId?: string; network?: string }, ctx) => {
           const net = subscriptionNetwork(args.network, ctx);
           return filterAsyncIterator<HostFnLogEvent>(
-            eventsToAsyncIterator<HostFnLogEvent>(hostFnLogEmitter, "hostfnlog:new"),
+            eventsToAsyncIterator<HostFnLogEvent>(hostFnLogEmitter, "hostfnlog:new", { channel: "hostfnlog" }),
             (l) => l.network === net && (!args.contractId || l.contractId === args.contractId)
           );
         },
