@@ -7,10 +7,12 @@ import {
   clearBackfillCursor,
   prisma,
 } from "../db";
-import { upsertHostFnLogs, parseHostFnEvent, type HostFnRecord } from "../indexer/host-fn-log";
-import { isNftTransferEvent, parseNftEvents } from "../ingester/nft";
 import type { Network } from "../network";
-import { resolveNetwork } from "../network";
+import { resolveNetwork, isNetwork } from "../network";
+import { resolveWatchedContractIds } from "../indexer";
+import { resolveLpPoolIds, loadKnownLpPools } from "../indexer/lp-shares";
+import { initTokenCache } from "../tokenCache";
+import { processEventBatch, batchTotal, type BatchContext } from "../indexer/batch";
 
 const DEFAULT_CHUNK_SIZE = 64;
 const DEFAULT_CONCURRENCY = 4;
@@ -19,13 +21,12 @@ const BATCH_SIZE = parseInt(process.env.EVENTS_BATCH_SIZE ?? "10000", 10);
 export interface BackfillOptions {
   fromLedger: number;
   toLedger: number;
+  /** Target chain to backfill; defaults to `STELLAR_NETWORK` via `resolveNetwork`. */
   network?: Network;
   chunkSize?: number;
   concurrency?: number;
   signal?: AbortSignal;
   force?: boolean;
-  /** Target chain to backfill; defaults to `STELLAR_NETWORK` via `resolveNetwork`. */
-  network?: Network;
   /** Explicit contract watch-list override (`--contracts <id,id>`). */
   contracts?: string[];
   /**
@@ -100,7 +101,7 @@ async function processChunk(
   chunk: Chunk,
   contracts: string[],
   source: SourceSwitcher,
-  network: Network,
+  ctx: BatchContext,
   signal?: AbortSignal,
 ): Promise<number> {
   if (signal?.aborted) return 0;
@@ -119,49 +120,13 @@ async function processChunk(
   );
   if (relevant.length === 0) return 0;
 
-  const fungible = relevant.filter((e) => !isNftTransferEvent(e));
-  const nft = relevant.filter((e) => isNftTransferEvent(e));
-
-  let totalInserted = 0;
-
-  if (fungible.length > 0) {
-    try {
-      const records = parseEvents(fungible, network);
-      if (records.length > 0) {
-        const inserted = await upsertTransfers(records);
-        totalInserted += inserted;
-      }
-    } catch (err) {
-      console.error(`[backfill] Fungible parse error in chunk ${chunk.start}-${chunk.end}:`, err);
-    }
-  }
-
-  if (nft.length > 0) {
-    try {
-      const parsed = parseNftEvents(nft);
-      if (parsed.length > 0) {
-        const inserted = await upsertNftTransfers(parsed.map((p) => p.record));
-        totalInserted += inserted;
-      }
-    } catch (err) {
-      console.error(`[backfill] NFT parse error in chunk ${chunk.start}-${chunk.end}:`, err);
-    }
-  }
-
   try {
-    const hostFnRecords = relevant
-      .map((e) => {
-        try { return parseHostFnEvent(e); } catch { return null; }
-      })
-      .filter((r): r is HostFnRecord => r !== null);
-    if (hostFnRecords.length > 0) {
-      await upsertHostFnLogs(hostFnRecords);
-    }
+    const result = await processEventBatch(relevant, ctx);
+    return batchTotal(result);
   } catch (err) {
-    console.error(`[backfill] HostFn log error in chunk ${chunk.start}-${chunk.end}:`, err);
+    console.error(`[backfill] Chunk ${chunk.start}-${chunk.end} failed:`, err);
+    return 0;
   }
-
-  return totalInserted;
 }
 
 export async function runBackfill(options: BackfillOptions): Promise<void> {
@@ -185,12 +150,7 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
 
   validateNetworkConfig([net]);
 
-  // Resolve the network once up-front: every chunk inherits it, so a backfill
-  // triggered for mainnet cannot accidentally write events under testnet just
-  // because STELLAR_NETWORK changed between chunks.
-  const net = resolveNetwork(network);
-
-  const contracts = resolveContractIds();
+  const contracts = resolveBackfillContractIds(net, options.contracts);
 
   let cursor = await getBackfillCursor(net);
   if (cursor) {
@@ -262,7 +222,7 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
     const wave = chunks.slice(i, i + concurrency);
     const results = await Promise.all(
       wave.map((c) =>
-        processChunk(c, contracts, source, net, signal).catch((err) => {
+        processChunk(c, contracts, source, batchCtx, signal).catch((err) => {
           console.error(`[backfill] Chunk ${c.start}-${c.end} failed:`, err);
           return 0;
         }),

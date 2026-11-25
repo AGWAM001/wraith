@@ -131,7 +131,9 @@ export async function processEventBatch(
       return 0;
     });
     transfersStoredTotal.inc({ network: net, type: "host_fn" }, hostFnInserted);
-    hostFnRecords.forEach((record) => emitHostFnLog(record, net));
+    if (notifyLive) {
+      hostFnRecords.forEach((record) => emitHostFnLog(record, net));
+    }
   }
 
   // ── LP-share path ──────────────────────────────────────────────────────────
