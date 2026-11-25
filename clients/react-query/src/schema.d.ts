@@ -3521,8 +3521,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        amountNGN?: number;
-                        amountStableCoin?: number;
+                        amountNGN?: number | string;
+                        amountStableCoin?: number | string;
                         bankAccount: string;
                         bankCode: string;
                         bankName: string;
@@ -3557,13 +3557,13 @@ export interface paths {
                             walletAddress: string;
                             chain: string;
                             coin: string;
-                            /** @description Stablecoin amount. The server accepts and may echo a plain decimal string. */
-                            amountStableCoin: number | string;
-                            /** @description Naira amount. The server accepts and may echo a plain decimal string. */
-                            amountNGN: number | string;
+                            /** @description Stablecoin amount. */
+                            amountStableCoin: number;
+                            /** @description Naira amount. */
+                            amountNGN: number;
                             rate: number;
                             /**
-                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.
                              * @example settled
                              */
                             status: string;
@@ -3594,13 +3594,13 @@ export interface paths {
                             walletAddress: string;
                             chain: string;
                             coin: string;
-                            /** @description Stablecoin amount. The server accepts and may echo a plain decimal string. */
-                            amountStableCoin: number | string;
-                            /** @description Naira amount. The server accepts and may echo a plain decimal string. */
-                            amountNGN: number | string;
+                            /** @description Stablecoin amount. */
+                            amountStableCoin: number;
+                            /** @description Naira amount. */
+                            amountNGN: number;
                             rate: number;
                             /**
-                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.
                              * @example settled
                              */
                             status: string;
@@ -3782,15 +3782,15 @@ export interface paths {
                         "application/json": {
                             id: string;
                             /**
-                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).
+                             * @description Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.
                              * @example settled
                              */
                             status: string;
                             providerStatus: string;
-                            /** @description Stablecoin amount. Numeric when live; may be a decimal string when served from cache. */
-                            amountStableCoin: number | string;
-                            /** @description Naira amount. Numeric when live; may be a decimal string when served from cache. */
-                            amountNGN: number | string;
+                            /** @description Stablecoin amount. */
+                            amountStableCoin: number;
+                            /** @description Naira amount. */
+                            amountNGN: number;
                             depositAddress: string;
                             rate: number;
                             /** Format: date-time */

@@ -719,9 +719,9 @@ export const offrampTrustlineResponseSchema = z.object({
 
 export const offrampOrderBodySchema = z
   .object({
-    /** Exactly one of amountNGN / amountStableCoin. */
-    amountNGN: z.number().optional(),
-    amountStableCoin: z.number().optional(),
+    /** Exactly one of amountNGN / amountStableCoin. Accepts a plain number or a decimal string (e.g. "50.00"). */
+    amountNGN: z.union([z.number(), z.string()]).optional(),
+    amountStableCoin: z.union([z.number(), z.string()]).optional(),
     bankAccount: z.string().min(1),
     bankCode: z.string().min(1),
     bankName: z.string().min(1),
@@ -743,8 +743,9 @@ export const offrampOrderStatus = z
       "sometimes with a suffix appended for older wallet builds that only recognise a small " +
       "vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal " +
       "becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. " +
-      "Do not match on this field exhaustively; test for containment of the word the screen " +
-      "acts on (e.g. `status.includes('failed')`).",
+      "To test whether an order has failed, check `providerStatus` against the provider's " +
+      "known terminal words rather than substring-matching this field — substrings are " +
+      "unreliable because words like `refund_pending` contain `refund`.",
     example: "settled",
   });
 
@@ -765,11 +766,11 @@ export const offrampOrderResponseSchema = z.object({
   walletAddress: z.string().openapi({ description: "Deposit address the stablecoin is sent to." }),
   chain: z.string(),
   coin: z.string(),
-  amountStableCoin: z.union([z.number(), z.string()]).openapi({
-    description: "Stablecoin amount. The server accepts and may echo a plain decimal string.",
+  amountStableCoin: z.number().openapi({
+    description: "Stablecoin amount.",
   }),
-  amountNGN: z.union([z.number(), z.string()]).openapi({
-    description: "Naira amount. The server accepts and may echo a plain decimal string.",
+  amountNGN: z.number().openapi({
+    description: "Naira amount.",
   }),
   rate: z.number(),
   status: offrampOrderStatus,
@@ -786,11 +787,11 @@ export const offrampOrderStatusResponseSchema = z.object({
   id: z.string(),
   status: offrampOrderStatus,
   providerStatus: z.string(),
-  amountStableCoin: z.union([z.number(), z.string()]).openapi({
-    description: "Stablecoin amount. Numeric when live; may be a decimal string when served from cache.",
+  amountStableCoin: z.number().openapi({
+    description: "Stablecoin amount.",
   }),
-  amountNGN: z.union([z.number(), z.string()]).openapi({
-    description: "Naira amount. Numeric when live; may be a decimal string when served from cache.",
+  amountNGN: z.number().openapi({
+    description: "Naira amount.",
   }),
   depositAddress: z.string(),
   rate: z.number(),

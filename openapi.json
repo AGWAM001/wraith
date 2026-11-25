@@ -6550,10 +6550,24 @@
                 "type": "object",
                 "properties": {
                   "amountNGN": {
-                    "type": "number"
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "amountStableCoin": {
-                    "type": "number"
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "bankAccount": {
                     "type": "string",
@@ -6627,33 +6641,19 @@
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Stablecoin amount. The server accepts and may echo a plain decimal string."
+                      "type": "number",
+                      "description": "Stablecoin amount."
                     },
                     "amountNGN": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Naira amount. The server accepts and may echo a plain decimal string."
+                      "type": "number",
+                      "description": "Naira amount."
                     },
                     "rate": {
                       "type": "number"
                     },
                     "status": {
                       "type": "string",
-                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.",
                       "example": "settled"
                     },
                     "providerStatus": {
@@ -6707,33 +6707,19 @@
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Stablecoin amount. The server accepts and may echo a plain decimal string."
+                      "type": "number",
+                      "description": "Stablecoin amount."
                     },
                     "amountNGN": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Naira amount. The server accepts and may echo a plain decimal string."
+                      "type": "number",
+                      "description": "Naira amount."
                     },
                     "rate": {
                       "type": "number"
                     },
                     "status": {
                       "type": "string",
-                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.",
                       "example": "settled"
                     },
                     "providerStatus": {
@@ -6999,33 +6985,19 @@
                     },
                     "status": {
                       "type": "string",
-                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. Do not match on this field exhaustively; test for containment of the word the screen acts on (e.g. `status.includes('failed')`).",
+                      "description": "Client-facing status. The server sends the provider's own word (e.g. `initiated`, `processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), sometimes with a suffix appended for older wallet builds that only recognise a small vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. To test whether an order has failed, check `providerStatus` against the provider's known terminal words rather than substring-matching this field — substrings are unreliable because words like `refund_pending` contain `refund`.",
                       "example": "settled"
                     },
                     "providerStatus": {
                       "type": "string"
                     },
                     "amountStableCoin": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Stablecoin amount. Numeric when live; may be a decimal string when served from cache."
+                      "type": "number",
+                      "description": "Stablecoin amount."
                     },
                     "amountNGN": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ],
-                      "description": "Naira amount. Numeric when live; may be a decimal string when served from cache."
+                      "type": "number",
+                      "description": "Naira amount."
                     },
                     "depositAddress": {
                       "type": "string"
