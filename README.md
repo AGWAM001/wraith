@@ -131,6 +131,22 @@ By default, this seeds `testnet`. To seed `mainnet`:
 npm run db:seed -- --network=mainnet
 ```
 
+### 6. Rebuild account summaries (maintenance)
+
+`AccountSummary` is maintained incrementally during indexing, but can be repaired per network from `TokenTransfer` with:
+
+```bash
+npm run backfill:summaries -- --network testnet
+```
+
+Flags:
+- `--network <testnet|mainnet>` *(required)* — rebuilds only the named network; the other network's rows are untouched.
+- `--dry-run` — scans transfers and prints how many summary rows would be inserted, updated, or deleted without writing anything.
+- `--accept-truncated-history` — required if older transfers for that network have already been pruned by `RETENTION_DAYS` (when the oldest stored transfer is newer than the oldest summary, or no transfers remain while summaries exist); without this flag the command refuses to shrink lifetime totals.
+- `--batch-size <num>` — rows per keyset page (overrides `BACKFILL_BATCH_SIZE`, default `5000`).
+
+The command pages `TokenTransfer` by keyset (`id`) and applies only the computed diff inside one transaction, so API readers never observe an empty `AccountSummary` table during a rebuild. Note that if retention pruning has already deleted older transfers, a rebuild can only recompute totals from the transfers still stored in Postgres unless `--accept-truncated-history` is passed explicitly.
+
 You can now query the seeded data:
 
 ```bash
@@ -1211,6 +1227,7 @@ run docs:openapi` (and the deployment's network settings).
 | `CONTRACT_IDS`             | *(all)*       | Comma-separated token contract IDs to watch. Empty = watch all (very heavy on mainnet)        |
 | `EVENTS_BATCH_SIZE`        | `10000`       | Max events per RPC call (Stellar RPC hard-cap is 10 000)                                      |
 | `RETENTION_DAYS`           | `30`          | Delete transfers older than N days (keeps DB within free-tier limits)                         |
+| `BACKFILL_BATCH_SIZE`      | `5000`        | Rows per keyset page when running `npm run backfill:summaries`                                |
 | `NETWORKS`                 | *(`STELLAR_NETWORK`)* | Comma-separated networks to index in one process, e.g. `testnet,mainnet`. Also the set the API's `?network=` selector accepts. |
 | `PORT`                     | `3000`        | REST API port                                                                                 |
 | `CORS_ALLOWED_ORIGINS`    | *(empty)*     | Comma-separated origins allowed to call the restricted surfaces (offramp orders, naira rails, webhook subscriptions, `/metrics`, and any unclassified write). Empty = no browser origin may call them; requests with no `Origin` header are always served. See [CORS](#cors). |
