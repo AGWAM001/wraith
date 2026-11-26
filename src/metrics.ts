@@ -319,6 +319,58 @@ export const eventsSkippedTotal = new Counter({
   registers: [registry],
 });
 
+/**
+ * The live-subscription channels, as a finite label set (#453).
+ *
+ * One per in-process emitter in src/events.ts: `transfer` for new transfers,
+ * `hostfnlog` for new host-function logs. Nothing else may become a value of
+ * the `channel` label.
+ */
+export const SUBSCRIPTION_CHANNELS = ["transfer", "hostfnlog"] as const;
+export type SubscriptionChannel = (typeof SUBSCRIPTION_CHANNELS)[number];
+
+/** True when `value` is one of {@link SUBSCRIPTION_CHANNELS}. */
+export function isSubscriptionChannel(value: unknown): value is SubscriptionChannel {
+  return typeof value === "string" && (SUBSCRIPTION_CHANNELS as readonly string[]).includes(value);
+}
+
+/**
+ * Events a live GraphQL subscriber never received because it read too slowly.
+ *
+ * Each subscription holds at most `maxQueue` unread events (see
+ * `eventsToAsyncIterator` in src/events.ts); past that the oldest is dropped,
+ * so a stalled client cannot grow server memory. Dropping is deliberate, but it
+ * used to be silent: the subscriber was not told and neither was the operator,
+ * and a client that believed it had seen every transfer had not. Any increase
+ * means some subscriber's stream has a gap.
+ *
+ * The queue sits before the subscription's own filter (network, contractId),
+ * so a drop is counted per event the subscriber was sent, whether or not its
+ * filter would have kept it.
+ *
+ * Labelled by `channel` only, from {@link SUBSCRIPTION_CHANNELS}. Never a
+ * subscription id, a contract id, an address or a URL: one series per
+ * subscriber is unbounded cardinality. Messages dropped on a saturated
+ * WebSocket are a separate mechanism (#407) and are not counted here.
+ */
+export const subscriptionEventsDroppedTotal = new Counter({
+  name: "subscription_events_dropped_total",
+  help: "Events dropped from a live subscriber's queue because it read too slowly, by channel",
+  labelNames: ["channel"] as const,
+  registers: [registry],
+});
+
+/**
+ * Record one event dropped from a subscriber's queue.
+ *
+ * Re-checks the channel at runtime so a cast or an untyped caller can never
+ * add a third label value.
+ */
+export function recordSubscriptionEventDropped(channel: SubscriptionChannel): void {
+  if (!isSubscriptionChannel(channel)) return;
+  subscriptionEventsDroppedTotal.inc({ channel });
+}
+
 /** The money-moving rails, as a finite label set. */
 export type OrderRail = "offramp" | "onramp" | "bills";
 
