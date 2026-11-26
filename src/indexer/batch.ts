@@ -22,7 +22,7 @@
 
 import { parseEvents } from "../decoder";
 import {
-  upsertTransfers,
+  upsertTransfersReturning,
   upsertAccountSummaries,
   upsertNftTransfers,
   getNftMetadata,
@@ -35,7 +35,7 @@ import { parseLpShareEvents, upsertLpShareTransfers } from "./lp-shares";
 import { enrichNftMetadata } from "./nft-metadata";
 import { isNftEvent, parseNftEvents, fetchNftMetadata } from "../ingester/nft";
 import { getTokenMetadata } from "../tokenCache";
-import { transfersStoredTotal } from "../metrics";
+import { transfersStoredTotal, eventsSkippedTotal } from "../metrics";
 import type { RawEvent } from "../rpc";
 import type { Network } from "../network";
 
@@ -84,19 +84,19 @@ export async function processEventBatch(
   const nftRawEvents   = events.filter((e) => isNftEvent(e));
 
   // ── Fungible path ────────────────────────────────────────────────────────────
-  const records  = parseEvents(fungibleEvents);
+  const records  = parseEvents(fungibleEvents, net);
   // Tag each transfer with whether its contract is a SAC (#136). Best-effort:
   // a detection failure must never block ingest, so default to false on error.
   await tagSacTransfers(records, undefined, net).catch((e: unknown) =>
     console.error(`[indexer/${net}] SAC detection failed:`, e)
   );
-  const inserted = await upsertTransfers(records, net);
+  const insertedRecords = await upsertTransfersReturning(records, net);
+  const inserted = insertedRecords.length;
 
-  // Resolve metadata for every distinct token in this batch. Only a cache miss
-  // reaches RPC, and a miss happens once per contract for the life of the
-  // database — so this is one extra call the first time a token is seen and
-  // free thereafter. Best-effort: a token whose metadata cannot be read is
-  // still worth indexing transfers for.
+  // Resolve metadata for every distinct token in this batch. Successful
+  // lookups are cached; failures are temporarily suppressed with in-memory
+  // negative caching, and concurrent lookups for the same token are deduplicated.
+  // Best-effort: a token whose metadata cannot be read is still worth indexing.
   await Promise.all(
     [...new Set(records.map((r) => r.contractId))].map((contractId) =>
       getTokenMetadata(contractId, net).catch(() => undefined)
@@ -104,26 +104,34 @@ export async function processEventBatch(
   );
   transfersStoredTotal.inc({ network: net, type: "fungible" }, inserted);
 
-  // Update materialized account summaries alongside transfer inserts
-  if (inserted > 0) {
-    await upsertAccountSummaries(records, net).catch((e: unknown) =>
+  // Update materialized account summaries only for newly inserted transfers
+  // so partial-overlap replays never double-count balances or tx counts (#367).
+  if (insertedRecords.length > 0) {
+    await upsertAccountSummaries(insertedRecords, net).catch((e: unknown) =>
       console.error(`[indexer/${net}] Account summary upsert failed:`, e)
     );
   }
 
-  // Broadcast each new record to WebSocket subscribers and webhook workers
-  if (notifyLive && inserted > 0) {
-    records.forEach((record) => emitTransfer(record, net));
+  // Broadcast only newly inserted records to WebSocket subscribers and webhook workers (#367).
+  if (notifyLive && insertedRecords.length > 0) {
+    insertedRecords.forEach((record) => emitTransfer(record, net));
   }
 
   // Log every event as a raw host-fn invocation for downstream consumers (#84)
-  const hostFnRecords = events
-    .map(raw => { try { return parseHostFnEvent(raw); } catch { return null; } })
-    .filter((r): r is HostFnRecord => r !== null);
+  const hostFnParsed = events
+    .map(raw => { try { return parseHostFnEvent(raw); } catch { return null; } });
+  const hostFnDropped = hostFnParsed.filter(r => r === null).length;
+  const hostFnRecords = hostFnParsed.filter((r): r is HostFnRecord => r !== null);
+  if (hostFnDropped > 0) {
+    eventsSkippedTotal.inc({ network: net, reason: "host_fn" }, hostFnDropped);
+    console.warn(`[indexer/${net}] Dropped ${hostFnDropped} host-fn events (parse failure) in this batch`);
+  }
   if (hostFnRecords.length > 0) {
-    await upsertHostFnLogs(hostFnRecords, net).catch((err: unknown) =>
-      console.error(`[indexer/${net}] host-fn log error:`, err),
-    );
+    const hostFnInserted = await upsertHostFnLogs(hostFnRecords, net).catch((err: unknown) => {
+      console.error(`[indexer/${net}] host-fn log error:`, err);
+      return 0;
+    });
+    transfersStoredTotal.inc({ network: net, type: "host_fn" }, hostFnInserted);
     if (notifyLive) {
       hostFnRecords.forEach((record) => emitHostFnLog(record, net));
     }
@@ -143,9 +151,17 @@ export async function processEventBatch(
     console.error(`[indexer/${net}] LP-share upsert failed:`, e);
     return 0;
   });
+  if (lpInserted > 0) {
+    transfersStoredTotal.inc({ network: net, type: "lp" }, lpInserted);
+  }
 
   // ── NFT path ─────────────────────────────────────────────────────────────────
   const nftParsed   = parseNftEvents(nftRawEvents);
+  const nftDropped  = nftRawEvents.length - nftParsed.length;
+  if (nftDropped > 0) {
+    eventsSkippedTotal.inc({ network: net, reason: "nft_parse" }, nftDropped);
+    console.warn(`[indexer/${net}] Dropped ${nftDropped} NFT events (parse failure) in this batch`);
+  }
   const nftRecords  = nftParsed.map((p) => p.record);
   const nftInserted = await upsertNftTransfers(nftRecords, net);
   transfersStoredTotal.inc({ network: net, type: "nft" }, nftInserted);
