@@ -719,9 +719,9 @@ export const offrampTrustlineResponseSchema = z.object({
 
 export const offrampOrderBodySchema = z
   .object({
-    /** Exactly one of amountNGN / amountStableCoin. */
-    amountNGN: z.number().optional(),
-    amountStableCoin: z.number().optional(),
+    /** Exactly one of amountNGN / amountStableCoin. Accepts a plain number or a decimal string (e.g. "50.00"). */
+    amountNGN: z.union([z.number(), z.string()]).optional(),
+    amountStableCoin: z.union([z.number(), z.string()]).optional(),
     bankAccount: z.string().min(1),
     bankCode: z.string().min(1),
     bankName: z.string().min(1),
@@ -735,16 +735,43 @@ export const offrampOrderBodySchema = z
   .passthrough();
 
 export const offrampOrderStatus = z
-  .enum(["pending", "waiting_for_deposit", "processing", "completed", "failed", "expired"])
-  .openapi({ description: "Client-facing status mapped from the provider's raw one." });
+  .string()
+  .openapi({
+    description:
+      "Client-facing status. The server sends the provider's own word (e.g. `initiated`, " +
+      "`processing`, `settled`, `disbursed`, `failed`, `expired`, `refunded`, `cancelled`), " +
+      "sometimes with a suffix appended for older wallet builds that only recognise a small " +
+      "vocabulary: an expiry becomes `<raw> (timeout)` and a refund, cancel or reversal " +
+      "becomes `<raw> (failed)`. The raw provider word is always in `providerStatus`. " +
+      "To test whether an order has failed, check `providerStatus` against the provider's " +
+      "known terminal words rather than substring-matching this field — substrings are " +
+      "unreliable because words like `refund_pending` contain `refund`.",
+    example: "settled",
+  });
 
 export const offrampOrderResponseSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    description:
+      "Client-facing order id. Format: `ofr_` followed by 22 URL-safe characters (128 bits). " +
+      "Never the provider's internal id.",
+    example: "ofr_<22 URL-safe characters>",
+  }),
+  accessToken: z.string().openapi({
+    description:
+      "Bearer credential that authorises reading this order. Format: `oft_` followed by " +
+      "43 URL-safe characters (256 bits). Shown exactly once — only its SHA-256 is stored. " +
+      "On a replay the previous token is invalidated and a new one is issued.",
+    example: "oft_<43 URL-safe characters>",
+  }),
   walletAddress: z.string().openapi({ description: "Deposit address the stablecoin is sent to." }),
   chain: z.string(),
   coin: z.string(),
-  amountStableCoin: z.number(),
-  amountNGN: z.number(),
+  amountStableCoin: z.number().openapi({
+    description: "Stablecoin amount.",
+  }),
+  amountNGN: z.number().openapi({
+    description: "Naira amount.",
+  }),
   rate: z.number(),
   status: offrampOrderStatus,
   providerStatus: z.string().optional().openapi({ description: "Raw provider status, when the order is not a replay." }),
@@ -760,8 +787,12 @@ export const offrampOrderStatusResponseSchema = z.object({
   id: z.string(),
   status: offrampOrderStatus,
   providerStatus: z.string(),
-  amountStableCoin: z.number(),
-  amountNGN: z.number(),
+  amountStableCoin: z.number().openapi({
+    description: "Stablecoin amount.",
+  }),
+  amountNGN: z.number().openapi({
+    description: "Naira amount.",
+  }),
   depositAddress: z.string(),
   rate: z.number(),
   createdAt: z.string().datetime({ offset: true }),
