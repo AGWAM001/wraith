@@ -289,6 +289,36 @@ export const summaryResponseSchema = z.object({
   tokens: z.array(tokenSummarySchema),
 });
 
+/**
+ * An amount a person reads, in major units, signed.
+ *
+ * A minus sign is how a negative reads — `displayNetFlow` and every
+ * `displayAmount` already do it this way, and a field whose sign is a word in
+ * the string ("5.0000000 (negative)") is a field no client can format without
+ * special-casing it.
+ */
+const signedDisplayAmountSchema = z
+  .string()
+  .regex(/^-?\d+(\.\d+)?$/, "display amounts are a plain signed decimal, with no words in them");
+
+/** One asset the address has ever touched, as the account summary serves it. */
+export const accountAssetSummarySchema = z.object({
+  contractId: contractAddressSchema,
+  totalSent: z.string(),
+  totalReceived: z.string(),
+  net: z.string(),
+  displayTotalSent: signedDisplayAmountSchema,
+  displayTotalReceived: signedDisplayAmountSchema,
+  displayNet: signedDisplayAmountSchema,
+  txCount: z.number().int(),
+  lastActivityAt: isoDateTimeSchema,
+});
+
+export const accountSummaryResponseSchema = z.object({
+  address: stellarAddressSchema,
+  assets: z.array(accountAssetSummarySchema),
+});
+
 export const webhookFilterSchema = z
   .object({
     contract: z.string().optional(),
@@ -497,6 +527,22 @@ export const summaryQuerySchema = z.object({
   contractId: optionalQueryString("Token contract ID to filter by"),
   fromDate: optionalQueryDateTime("Inclusive lower bound on ledgerClosedAt"),
   toDate: optionalQueryDateTime("Inclusive upper bound on ledgerClosedAt"),
+}).passthrough();
+
+/**
+ * What `GET /accounts/{address}/summary` takes.
+ *
+ * Narrower than {@link summaryQuerySchema} on purpose. That route computes over
+ * the transfer rows and can honour a date window; this one reads the
+ * materialised `AccountSummary` rollup, which holds one all-time row per asset
+ * and has no window to filter. The route rejects `fromDate` and `toDate`
+ * explicitly, but unrelated query parameters pass through for compatibility
+ * with installed apps that add their own.
+ */
+export const accountSummaryQuerySchema = z.object({
+  ...withNetwork,
+  address: stellarAddressSchema,
+  contractId: optionalQueryString("Token contract ID to filter by"),
 }).passthrough();
 
 export const txHashParamsSchema = z.object({
