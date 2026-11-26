@@ -174,6 +174,7 @@ const withNetwork = { network: networkQuerySchema };
 
 export const errorResponseSchema = z.object({
   error: z.string(),
+  code: z.string().optional(),
 });
 
 export const booleanOkResponseSchema = z.object({
@@ -812,6 +813,9 @@ export const offrampOrderResponseSchema = z.object({
   walletAddress: z.string().openapi({ description: "Deposit address the stablecoin is sent to." }),
   chain: z.string(),
   coin: z.string(),
+  coinType: z.string().optional(),
+  currency: z.string().optional(),
+  depositDigest: z.string().optional(),
   amountStableCoin: z.number().openapi({
     description: "Stablecoin amount.",
   }),
@@ -820,7 +824,7 @@ export const offrampOrderResponseSchema = z.object({
   }),
   rate: z.number(),
   status: offrampOrderStatus,
-  providerStatus: z.string().optional().openapi({ description: "Raw provider status, when the order is not a replay." }),
+  providerStatus: z.string().optional().openapi({ description: "Raw provider status, when the order is a replay." }),
   /** True when an existing idempotencyKey returned the original order instead of creating one. */
   replayed: z.boolean().optional(),
 });
@@ -842,6 +846,9 @@ export const offrampOrderStatusResponseSchema = z.object({
   depositAddress: z.string(),
   rate: z.number(),
   createdAt: z.string().datetime({ offset: true }),
+  currency: z.string().optional(),
+  created: z.string().optional(),
+  updated: z.string().optional(),
   /**
    * "live" when reconciled against the provider, "cache" when the provider was
    * unreachable and the stored row was served instead.
