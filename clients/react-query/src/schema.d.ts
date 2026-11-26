@@ -3907,6 +3907,292 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/discord/interactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Discord interaction callback
+         * @description Internal endpoint. Not part of the public data API: it belongs to the Veil Discord roles bot. Answers 503 unless the deployment has a Discord application configured. Called by Discord when a member uses a command or presses a button. Every request is verified against the application's Ed25519 public key; anything else is answered 401.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Interaction response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            type: number;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
+                /** @description Unreadable interaction */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Invalid request signature */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Discord is not configured on this deployment */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/discord/link/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Which Discord member a link code belongs to
+         * @description Internal endpoint. Not part of the public data API: it belongs to the Veil Discord roles bot. Answers 503 unless the deployment has a Discord application configured. Lets the wallet show whose Discord account is about to be linked before the member approves. Returns no wallet address and cannot be used to look one up.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The eight-character code the bot gave the member. Case and a dash are ignored. */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Discord's id for the member. Part of the text the wallet signs. */
+                            discordUserId: string;
+                            /** @description Shown to the member before they approve. */
+                            discordUsername: string;
+                            /** @description ISO time after which the code stops working. */
+                            expiresAt: string;
+                        };
+                    };
+                };
+                /** @description The code is unknown, used, or has run out */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Discord is not configured on this deployment */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/discord/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Prove a Veil wallet belongs to a Discord member
+         * @description Internal endpoint. Not part of the public data API: it belongs to the Veil Discord roles bot. Answers 503 unless the deployment has a Discord application configured. The wallet's passkey (and the spending account's key, when sent) sign a statement naming the code, the Discord member and the addresses. The passkey must be a signer the wallet contract lists and the contract must run Veil's wallet code. On success the member's roles are set. The response never contains an address.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        code: string;
+                        /** @description The smart wallet (C address), when one is being linked. */
+                        wallet?: string | null;
+                        /** @description The spending account (G address), when one is being linked. */
+                        spending?: string | null;
+                        /** @description Required with `wallet`: the passkey's signature over the link statement. */
+                        passkey?: {
+                            /** @description Base64url, 65 bytes: the passkey's uncompressed P-256 public key. */
+                            publicKey: string;
+                            /** @description Base64url WebAuthn authenticator data. */
+                            authData: string;
+                            /** @description Base64url WebAuthn client data. */
+                            clientDataJSON: string;
+                            /** @description Base64url, 64 bytes: the raw r and s of the signature. */
+                            signature: string;
+                        };
+                        /** @description Required with `spending`: base64url Ed25519 signature over the link statement hash. */
+                        spendingSignature?: string;
+                        /** @description Veil names the app believes the member holds. Each is checked against the registry. */
+                        names?: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Linked */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            linked: true;
+                            discordUsername: string;
+                            /** @description The role names the member now has. */
+                            roles: string[];
+                            /** @description True when a check could not be finished and will be retried. */
+                            incomplete: boolean;
+                            /** @description False when the member is not in the server, so no role could be set. */
+                            inServer: boolean;
+                        };
+                    };
+                };
+                /** @description An address is missing or not valid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description A signature did not check out, or the address is not a Veil wallet */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description The network has no record of the wallet (it may have been archived) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description The code is unknown, used, or has run out */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Discord is not configured, or the network could not be read */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {

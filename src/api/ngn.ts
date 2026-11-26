@@ -86,6 +86,29 @@ function isConfigured(): boolean {
  * The answer is marked `stale: true` so a client cannot mistake a last-known
  * status for a live one. A bill that was `initiated` when we last heard is not
  * evidence that it still is.
+ *
+ * The body is built **field by field, in the live answer's field names** for
+ * the rail — never by spreading the record. The record's own column names
+ * (`amountNGN`, `kind`, `billCategory` on an onramp, …) are not the provider's
+ * names, and the record carries things no caller should receive
+ * (`walletAddress`, `rate`, the settled amounts, `txHash`). A client written
+ * against the live shape must be able to read the stale one unchanged:
+ *
+ * - a bill's `status` goes through {@link billStatusForClients}, exactly as
+ *   the live route translates it, with the recorded word kept as
+ *   `providerStatus`. Without that, a bill we recorded as `settled` was sent
+ *   as `settled` — a word the bills screen does not end on — so a delivered
+ *   top-up showed as still waiting precisely while the provider was down.
+ * - an onramp's `status` is sent as recorded, as the live route sends it,
+ *   also with `providerStatus` alongside.
+ * - fields the record does not hold are **left out, not invented**: an
+ *   onramp's bank details and a bill's deposit `wallet`, `description` and
+ *   `created` exist only in the provider's answer. (The address we do hold
+ *   for a bill is the *refund* address, which is not the deposit `wallet`,
+ *   so it is not sent under that name.)
+ * - the record's amounts are strings; the live answers carry numbers, so
+ *   they are converted — the same `Number(...)` the offramp's stale answer
+ *   uses for its row.
  */
 async function fallbackToRecordedOrder(
   res: Response,
@@ -93,13 +116,43 @@ async function fallbackToRecordedOrder(
   network: string,
   customerRef: string,
   orderId: string,
+  kind: "bill" | "onramp",
 ): Promise<boolean> {
   if (!(err instanceof LinqError) || err.status < 500) return false;
 
   const recorded = await findNgnOrder(network, customerRef, orderId).catch(() => null);
   if (!recorded) return false;
 
-  res.json({ ...recorded, stale: true, reason: "Linq is unreachable; this is our last known status" });
+  const reason = "Linq is unreachable; this is our last known status";
+
+  if (kind === "bill") {
+    res.json({
+      orderId: recorded.orderId,
+      customerRef: recorded.customerRef,
+      status: billStatusForClients(recorded.status),
+      providerStatus: recorded.status,
+      ...(recorded.billCategory ? { billCategory: recorded.billCategory } : {}),
+      amountNgn: Number(recorded.amountNGN),
+      amountStableCoin: Number(recorded.amountStableCoin),
+      ...(recorded.updatedAt ? { updated: new Date(recorded.updatedAt).toISOString() } : {}),
+      stale: true,
+      reason,
+    });
+    return true;
+  }
+
+  res.json({
+    orderId: recorded.orderId,
+    customerRef: recorded.customerRef,
+    status: recorded.status,
+    providerStatus: recorded.status,
+    // Linq's onramp status names the stablecoin amount `amount`; the record
+    // calls it `amountStableCoin`. The live name wins.
+    amount: Number(recorded.amountStableCoin),
+    amountNgn: Number(recorded.amountNGN),
+    stale: true,
+    reason,
+  });
   return true;
 }
 
@@ -193,7 +246,7 @@ async function rejectMispricedRate(
 
   let expected: number;
   try {
-    expected = await ngnPerCoin(coin, "onramp");
+    expected = await ngnPerCoin(coin, ngnRail(coin));
   } catch (err) {
     sendLinqError(res, err);
     return true;
@@ -329,6 +382,45 @@ export async function ngnPerCoin(coin: OnrampCoin, rail: RateRail): Promise<numb
     throw new LinqError("Could not price that asset right now", 502, "provider_error");
   }
   return rate;
+}
+
+/**
+ * The side of the provider's book a coin is quoted from on the `/ngn` routes.
+ *
+ * **USDC is quoted from the sell side.** The only thing a client can do with
+ * USDC here is pay a bill (the onramp is XLM-only, see `ONRAMP_COINS`), and a
+ * bill is a sale: the user hands over USDC and the provider spends naira, the
+ * same trade as a cash-out. Every USDC bill was priced from the buy side
+ * instead, and on 2026-11-11 the provider refused one with
+ *
+ *   "AmountStableCoin and rate do not match the current market rate"
+ *
+ * The two sides stood at 1,480.71 and 1,380.71 naira to the dollar that
+ * morning, so the order asked for about 7% more airtime than the provider
+ * gives for the money.
+ *
+ * That the sell side is the number they check against is an inference, from
+ * that refusal and from cash-outs settling at it. Linq has not said so. If a
+ * USDC bill is still refused with the same words after this, the inference is
+ * wrong and this function is the thing to revert.
+ *
+ * **XLM stays on the buy side.** It is what the onramp sells, and XLM bills
+ * priced that way have been accepted and vended. Whether the provider checks
+ * an XLM bill's rate at all is not known; moving a path that works on a guess
+ * would charge every XLM user the spread.
+ *
+ * It lives on the existing rate route, not a new bills route, because of who
+ * does the arithmetic. Installed builds read `GET /ngn/onramp/rate?coin=usdc`
+ * to price a bill and compute on the phone how much USDC to send. The server
+ * cannot re-price the order afterwards: the deposit is whatever the phone
+ * decided, and the provider vends whatever that deposit is worth. The only
+ * place to correct the price is the number the phone is given.
+ *
+ * When the onramp takes USDC again this has to split: a purchase is the buy
+ * side, and one route cannot answer both for the same coin.
+ */
+export function ngnRail(coin: OnrampCoin): RateRail {
+  return coin === "usdc" ? "offramp" : "onramp";
 }
 
 function createLookupLimiter(): RateLimitRequestHandler {
@@ -551,7 +643,9 @@ const COINS: Record<string, OnrampCoin> = { xlm: "xlm", usdc: "usdc" };
  *   - a bill is funded from the user's own balance, not from Linq's.
  *
  * This is a provider-inventory limit, not a protocol one. When they can source
- * USDC, delete this map and point the order route back at `COINS`.
+ * USDC, delete this map and point the order route back at `COINS` — and give
+ * bills their own rate route first, because `ngnRail` quotes USDC from the
+ * sell side on the strength of this gate.
  */
 const ONRAMP_COINS: Record<string, OnrampCoin> = { xlm: "xlm" };
 const BILL_CATEGORIES: BillCategory[] = ["airtime", "data", "electricity", "cabletv", "betting"];
@@ -769,7 +863,9 @@ export function createNgnRouter(
 
     try {
       res.setHeader("Cache-Control", "no-store");
-      res.json({ coin: resolvedCoin, rate: await ngnPerCoin(resolvedCoin, "onramp") });
+      // Not always the onramp's side of the book, despite the path: see
+      // `ngnRail`. USDC is quoted for the one thing it can buy here, a bill.
+      res.json({ coin: resolvedCoin, rate: await ngnPerCoin(resolvedCoin, ngnRail(resolvedCoin)) });
     } catch (err) {
       sendLinqError(res, err);
     }
@@ -857,7 +953,7 @@ export function createNgnRouter(
       });
       res.json(live);
     } catch (err) {
-      if (await fallbackToRecordedOrder(res, err, requestNetwork(req), customerRef, req.params.orderId as string)) {
+      if (await fallbackToRecordedOrder(res, err, requestNetwork(req), customerRef, req.params.orderId as string, "onramp")) {
         return;
       }
       sendLinqError(res, err);
@@ -981,7 +1077,7 @@ export function createNgnRouter(
       // top-up spinning forever. See billStatusForClients.
       res.json({ ...live, status: billStatusForClients(live.status), providerStatus: live.status });
     } catch (err) {
-      if (await fallbackToRecordedOrder(res, err, requestNetwork(req), customerRef, req.params.orderId as string)) {
+      if (await fallbackToRecordedOrder(res, err, requestNetwork(req), customerRef, req.params.orderId as string, "bill")) {
         return;
       }
       sendLinqError(res, err);

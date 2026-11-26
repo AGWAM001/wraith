@@ -15,6 +15,8 @@ import { createLinqWebhookRouter } from "./api/linqWebhook";
 import { createOfframpRouter } from "./api/offramp";
 import { createNgnRouter } from "./api/ngn";
 import { createOpsRouter } from "./api/ops";
+import { createDiscordInteractionsRouter } from "./discord/interactions";
+import { createDiscordLinkRouter } from "./discord/link";
 import { feesRouter } from "./api/fees";
 import { createGraphQLMiddleware } from "./graphql/server";
 import { createPopularAssetsRouter } from "./routes/assets/popular";
@@ -37,6 +39,7 @@ import { getAllCachedTokens, getCachedTokenDecimals } from "./tokenCache";
 import { toDisplayAmount } from "./amount";
 import { getDependencyStatus, dependencyStatusBoundMs } from "./dependencies";
 import { HttpError, newCorrelationId } from "./utils/errors";
+import { bodyParseFailure, loggableError } from "./utils/bodyError";
 
 // ─── RPC Health Check Cache ───────────────────────────────────────────────
 // Keyed by network (#163): one cache entry would let a healthy testnet RPC
@@ -203,6 +206,10 @@ export function createApp(): express.Application {
   // specifically, and it is silent when wrong: the route works, the signature
   // simply never matches.
   app.use("/webhooks/linq", createLinqWebhookRouter());
+  // Also before express.json(), for the same reason: Discord signs the raw
+  // body of every interaction. Above the rate limiter too, since every call
+  // arrives from Discord's own addresses and would share one bucket.
+  app.use("/discord/interactions", createDiscordInteractionsRouter());
 
   app.use(express.json());
   app.use(jsonApiMiddleware);
@@ -294,6 +301,8 @@ export function createApp(): express.Application {
   // Operator surface: what broke, without database access. Token-gated by
   // OPS_TOKEN; see .env.example.
   app.use("/ops", createOpsRouter());
+  // Linking a Veil wallet to a Discord member (src/discord). 503 unless configured.
+  app.use("/discord", createDiscordLinkRouter());
   // What the client should charge, and where to send it. Server-held so the
   // amount is never compiled into an APK.
   app.use("/fees", feesRouter());
@@ -1160,8 +1169,20 @@ else {
     // handler used to answer `err.message` verbatim, which is how a Postgres
     // connection string reached callers through a raw driver error. The caller
     // gets a correlation id; the detail stays in the log.
+    // A body the parser could not read is the caller's mistake, not ours. Its
+    // error object carries the whole raw body, which can hold a national ID
+    // number or bank details, so only the failure type is logged.
+    const parseFailure = bodyParseFailure(err);
+    if (parseFailure) {
+      console.warn(`[api] Unreadable request body (${parseFailure.type})`);
+      return res
+        .status(parseFailure.status)
+        .json({ error: "The request body could not be read", code: "invalid_request" });
+    }
+
     const correlationId = newCorrelationId();
-    console.error(`[api] Unhandled error (${correlationId}):`, err);
+    // Never the raw error: libraries hang request data on their errors.
+    console.error(`[api] Unhandled error (${correlationId}):`, loggableError(err));
 
     return res.status(500).json({
       error: "Internal server error",
