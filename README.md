@@ -540,6 +540,13 @@ name the Prometheus gauge is exported under. Both always carry the same value.
 selector. `networks` reports every running loop regardless of the selector, so a
 single response shows one chain falling behind while the other is healthy.
 
+`dependencies` reports passive observations from real provider calls (never
+live probes) within `dependency_status_bound_ms`. Plain `4xx` client rejections
+keep the provider `healthy` (`railsUsable: true`), while `5xx` / unreachable
+hosts (`error`), timeouts (`timeout`), and surfaced `429` rate limits
+(`rate_limited`) mark it `unavailable` (`railsUsable: false`) using only that
+bounded vocabulary — never provider messages, URLs, or order IDs.
+
 ***
 
 ### `GET /metrics`

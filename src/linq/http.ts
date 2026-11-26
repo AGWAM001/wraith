@@ -31,7 +31,7 @@ import {
   providerRateLimitWaitSeconds,
   providerRequestDurationSeconds,
 } from "../metrics";
-import { recordDependencyOutcome } from "../dependencies";
+import { recordDependencyOutcome, type DependencyFailure } from "../dependencies";
 
 const DEFAULT_BASE_URL = "https://confidential-brianna-uselinq-52e2b233.koyeb.app";
 
@@ -517,13 +517,37 @@ export async function linqCall<T>(path: string, options: LinqCallOptions): Promi
 
     // The same observation `/status` reports, taken from the call that was
     // happening anyway so the status route never has to probe the provider
-    // itself. Only the outcome word is kept: a Linq error message can contain
-    // the request URL, and `/status` must not repeat one back.
+    // itself. Only the bounded outcome word is kept: a Linq error message can
+    // contain the request URL, and `/status` must not repeat one back.
+    //
+    // Health classification (#456):
+    // - `success` and `4xx`: the provider answered normally (a 4xx is a caller
+    //   validation error such as a wrong bank code or unknown order id, not an
+    //   outage), so the dependency stays `healthy` (`railsUsable: true`).
+    // - `429`: only reaches this block when retries/budget are exhausted and a
+    //   429 surfaces to the caller (absorbed retries end as `success`). Because
+    //   every Veil user shares one Linq API key, a surfaced 429 means the rails
+    //   are actively refusing traffic; recording it as `unavailable` with the
+    //   bounded reason `"rate_limited"` keeps it visible to operators on
+    //   `/status` and distinct from a 5xx outage.
+    // - `timeout`: `unavailable` with `"timeout"`.
+    // - `5xx` (including unreachable host / connection failures): `unavailable`
+    //   with `"error"`.
+    const depUsable = outcome === "success" || outcome === "4xx";
+    const depError: DependencyFailure | undefined =
+      depUsable
+        ? undefined
+        : outcome === "timeout"
+          ? "timeout"
+          : outcome === "429"
+            ? "rate_limited"
+            : "error";
+
     recordDependencyOutcome(
       "linq",
-      outcome === "success",
+      depUsable,
       Math.round(elapsedMs),
-      outcome === "timeout" ? "timeout" : outcome === "success" ? undefined : "error",
+      depError,
     );
   }
 }
