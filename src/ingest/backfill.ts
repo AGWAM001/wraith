@@ -7,11 +7,12 @@ import {
   clearBackfillCursor,
   prisma,
 } from "../db";
+import type { Network } from "../network";
+import { resolveNetwork, isNetwork } from "../network";
 import { resolveWatchedContractIds } from "../indexer";
-import { processEventBatch, batchTotal, type BatchContext } from "../indexer/batch";
-import { loadKnownLpPools, resolveLpPoolIds } from "../indexer/lp-shares";
+import { resolveLpPoolIds, loadKnownLpPools } from "../indexer/lp-shares";
 import { initTokenCache } from "../tokenCache";
-import { isNetwork, resolveNetwork, type Network } from "../network";
+import { processEventBatch, batchTotal, type BatchContext } from "../indexer/batch";
 
 const DEFAULT_CHUNK_SIZE = 64;
 const DEFAULT_CONCURRENCY = 4;
@@ -20,12 +21,12 @@ const BATCH_SIZE = parseInt(process.env.EVENTS_BATCH_SIZE ?? "10000", 10);
 export interface BackfillOptions {
   fromLedger: number;
   toLedger: number;
+  /** Target chain to backfill; defaults to `STELLAR_NETWORK` via `resolveNetwork`. */
+  network?: Network;
   chunkSize?: number;
   concurrency?: number;
   signal?: AbortSignal;
   force?: boolean;
-  /** Target chain to backfill; defaults to `STELLAR_NETWORK` via `resolveNetwork`. */
-  network?: Network;
   /** Explicit contract watch-list override (`--contracts <id,id>`). */
   contracts?: string[];
   /**
@@ -119,14 +120,20 @@ async function processChunk(
   );
   if (relevant.length === 0) return 0;
 
-  const result = await processEventBatch(relevant, ctx);
-  return batchTotal(result);
+  try {
+    const result = await processEventBatch(relevant, ctx);
+    return batchTotal(result);
+  } catch (err) {
+    console.error(`[backfill] Chunk ${chunk.start}-${chunk.end} failed:`, err);
+    return 0;
+  }
 }
 
 export async function runBackfill(options: BackfillOptions): Promise<void> {
   const {
     fromLedger,
     toLedger,
+    network,
     chunkSize = DEFAULT_CHUNK_SIZE,
     concurrency = DEFAULT_CONCURRENCY,
     signal,
@@ -215,9 +222,8 @@ export async function runBackfill(options: BackfillOptions): Promise<void> {
     const wave = chunks.slice(i, i + concurrency);
     const results = await Promise.all(
       wave.map((c) =>
-        processChunk(c, contracts, source, batchCtx, signal).catch((err: unknown) => {
-          const reason = err instanceof Error ? err.name : "Error";
-          console.error(`[backfill/${net}] Chunk ${c.start}-${c.end} failed (${reason})`);
+        processChunk(c, contracts, source, batchCtx, signal).catch((err) => {
+          console.error(`[backfill] Chunk ${c.start}-${c.end} failed:`, err);
           return 0;
         }),
       ),
