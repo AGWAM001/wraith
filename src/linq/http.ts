@@ -450,6 +450,7 @@ export async function linqCall<T>(path: string, options: LinqCallOptions): Promi
   // seconds before succeeding is two seconds the provider cost us.
   const startedAt = process.hrtime.bigint();
   let outcome: ProviderCallOutcome = "success";
+  let failureStatus: number | undefined;
 
   try {
     for (let tried = 0; ; tried++) {
@@ -501,6 +502,7 @@ export async function linqCall<T>(path: string, options: LinqCallOptions): Promi
     }
   } catch (err) {
     outcome = classifyFailureOutcome(err);
+    if (err instanceof LinqError) failureStatus = err.status;
     throw err;
   } finally {
     const endpoint = normalizeEndpointPath(path);
@@ -519,11 +521,17 @@ export async function linqCall<T>(path: string, options: LinqCallOptions): Promi
     // happening anyway so the status route never has to probe the provider
     // itself. Only the bounded outcome word is kept: a Linq error message can
     // contain the request URL, and `/status` must not repeat one back.
+    // Observations are last-call-wins, so a subsequent healthy call clears a
+    // prior failure immediately.
     //
     // Health classification (#456):
-    // - `success` and `4xx`: the provider answered normally (a 4xx is a caller
-    //   validation error such as a wrong bank code or unknown order id, not an
-    //   outage), so the dependency stays `healthy` (`railsUsable: true`).
+    // - `success` and plain `4xx` (excluding `401` and `403`): the provider
+    //   answered normally (a caller validation error such as a wrong bank code
+    //   or unknown order id, not an outage), so the dependency stays `healthy`
+    //   (`railsUsable: true`).
+    // - `401` and `403`: kept `unavailable` with `"error"` because a revoked
+    //   or rotated API key — or a blanket 403 from the provider's hosting
+    //   platform — breaks the naira rails for every user.
     // - `429`: only reaches this block when retries/budget are exhausted and a
     //   429 surfaces to the caller (absorbed retries end as `success`). Because
     //   every Veil user shares one Linq API key, a surfaced 429 means the rails
@@ -533,7 +541,8 @@ export async function linqCall<T>(path: string, options: LinqCallOptions): Promi
     // - `timeout`: `unavailable` with `"timeout"`.
     // - `5xx` (including unreachable host / connection failures): `unavailable`
     //   with `"error"`.
-    const depUsable = outcome === "success" || outcome === "4xx";
+    const isAuthFailure = failureStatus === 401 || failureStatus === 403;
+    const depUsable = outcome === "success" || (outcome === "4xx" && !isAuthFailure);
     const depError: DependencyFailure | undefined =
       depUsable
         ? undefined

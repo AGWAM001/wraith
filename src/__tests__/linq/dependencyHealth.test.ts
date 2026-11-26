@@ -3,8 +3,9 @@
  * dependency health (#456).
  *
  * Covers:
- * - Mocked `fetch` through `linqCall` for 400, 404, 429, 500, timeout, and
- *   unreachable host, each followed by `getDependencyStatus()`.
+ * - Mocked `fetch` through `linqCall` for 400, 401, 403, 404, 429, 500,
+ *   timeout, unreachable host, and last-call-wins (5xx followed by 400), each
+ *   followed by `getDependencyStatus()`.
  * - Route test: a 4xx from `POST /offramp/verify-bank` leaves `GET /status`
  *   healthy (`railsUsable: true`) and `/status` makes zero provider calls.
  * - Strict key-set and leakage assertions proving no provider message, URL, or
@@ -123,6 +124,106 @@ describe("linqCall -> getDependencyStatus classification (#456)", () => {
         query: { id: "ord_missing_404" },
       }),
     ).rejects.toMatchObject({ status: 404 });
+
+    const depStatus = getDependencyStatus();
+    expect(depStatus.railsUsable).toBe(true);
+    expect(depStatus.dependencies.linq).toMatchObject({ status: "healthy" });
+    expect(depStatus.dependencies.linq.error).toBeUndefined();
+  });
+
+  it("marks HTTP 401 unavailable with bounded error 'error' and leaks no secrets", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(401, {
+        message: "Revoked API key biz_test_key_456 at https://provider.invalid/secret-path-token ord_401",
+        code: "invalid_api_key",
+      }),
+    );
+
+    await expect(
+      linqCall("/b2b/verify-bank", {
+        method: "POST",
+        operation: "offramp_verify_bank",
+        body: { bankCode: "000", accountNumber: "0000000000" },
+      }),
+    ).rejects.toMatchObject({ status: 401 });
+
+    const depStatus = getDependencyStatus();
+    expect(depStatus.railsUsable).toBe(false);
+    expect(depStatus.dependencies.linq).toMatchObject({
+      status: "unavailable",
+      error: "error",
+    });
+    expect(Object.keys(depStatus.dependencies.linq).every((k) => ALLOWED_DEPENDENCY_KEYS.has(k))).toBe(true);
+    expect(ALLOWED_ERROR_WORDS.has(depStatus.dependencies.linq.error!)).toBe(true);
+    const raw = JSON.stringify(depStatus);
+    expect(raw).not.toContain("biz_test_key_456");
+    expect(raw).not.toContain("secret-path-token");
+    expect(raw).not.toContain("ord_401");
+    expect(raw).not.toContain("Revoked API key");
+  });
+
+  it("marks HTTP 403 unavailable with bounded error 'error' and leaks no secrets", async () => {
+    fetchMock.mockResolvedValueOnce(
+      mockJsonResponse(403, {
+        message: "Forbidden for key biz_test_key_456 on https://provider.invalid/secret-path-token ord_403",
+        code: "forbidden",
+      }),
+    );
+
+    await expect(
+      linqCall("/b2b/offramp", {
+        method: "POST",
+        operation: "offramp_order",
+        body: { orderId: "ord_403" },
+      }),
+    ).rejects.toMatchObject({ status: 403 });
+
+    const depStatus = getDependencyStatus();
+    expect(depStatus.railsUsable).toBe(false);
+    expect(depStatus.dependencies.linq).toMatchObject({
+      status: "unavailable",
+      error: "error",
+    });
+    expect(Object.keys(depStatus.dependencies.linq).every((k) => ALLOWED_DEPENDENCY_KEYS.has(k))).toBe(true);
+    expect(ALLOWED_ERROR_WORDS.has(depStatus.dependencies.linq.error!)).toBe(true);
+    const raw = JSON.stringify(depStatus);
+    expect(raw).not.toContain("biz_test_key_456");
+    expect(raw).not.toContain("secret-path-token");
+    expect(raw).not.toContain("ord_403");
+    expect(raw).not.toContain("Forbidden for key");
+  });
+
+  it("applies last-call-wins semantics: a 400 immediately clears a prior 5xx", async () => {
+    fetchMock
+      .mockResolvedValueOnce(mockJsonResponse(503, { message: "Upstream service down" }))
+      .mockResolvedValueOnce(
+        mockJsonResponse(400, {
+          message: "Unknown bank code",
+          code: "invalid_bank_code",
+        }),
+      );
+
+    await expect(
+      linqCall("/b2b/verify-bank", {
+        method: "POST",
+        operation: "offramp_verify_bank",
+        body: { bankCode: "000", accountNumber: "0000000000" },
+      }),
+    ).rejects.toMatchObject({ status: 503 });
+
+    expect(getDependencyStatus().railsUsable).toBe(false);
+    expect(getDependencyStatus().dependencies.linq).toMatchObject({
+      status: "unavailable",
+      error: "error",
+    });
+
+    await expect(
+      linqCall("/b2b/verify-bank", {
+        method: "POST",
+        operation: "offramp_verify_bank",
+        body: { bankCode: "000", accountNumber: "0000000000" },
+      }),
+    ).rejects.toMatchObject({ status: 400 });
 
     const depStatus = getDependencyStatus();
     expect(depStatus.railsUsable).toBe(true);
@@ -281,6 +382,18 @@ describe("GET /status integration with bank check 4xx and leakage guard (#456)",
     const scenarios = [
       () =>
         fetchMock.mockResolvedValueOnce(
+          mockJsonResponse(401, {
+            message: "Invalid key biz_test_key_456 at https://provider.invalid/secret-path-token order=ord_secret_401",
+          }),
+        ),
+      () =>
+        fetchMock.mockResolvedValueOnce(
+          mockJsonResponse(403, {
+            message: "Access denied at https://provider.invalid/secret-path-token order=ord_secret_403",
+          }),
+        ),
+      () =>
+        fetchMock.mockResolvedValueOnce(
           mockJsonResponse(429, {
             message: "Quota hit for https://provider.invalid/secret-path-token order=ord_secret_429",
           }),
@@ -322,7 +435,10 @@ describe("GET /status integration with bank check 4xx and leakage guard (#456)",
       const raw = JSON.stringify(statusRes.body);
       expect(raw).not.toContain("provider.invalid");
       expect(raw).not.toContain("secret-path-token");
+      expect(raw).not.toContain("biz_test_key_456");
       expect(raw).not.toContain("ord_secret_");
+      expect(raw).not.toContain("Invalid key");
+      expect(raw).not.toContain("Access denied");
       expect(raw).not.toContain("Quota hit");
       expect(raw).not.toContain("Upstream error");
       expect(raw).not.toContain("ECONNREFUSED");
