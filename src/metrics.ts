@@ -634,6 +634,7 @@ export const discordRateLimitedTotal = new Counter({
   registers: [registry],
 });
 
+/**
  * Discord role checks, by outcome.
  *
  * The bot re-checks every linked member so a role stops counting when the thing

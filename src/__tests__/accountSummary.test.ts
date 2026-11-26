@@ -199,18 +199,29 @@ describe("GET /accounts/:address/summary", () => {
     expect(Object.keys(windowedSchema?.properties ?? {})).toContain("tokens");
   });
 
-  it("refuses a date window it cannot honour", async () => {
+  it("accepts unrelated query parameters from installed apps", async () => {
+    getAccountSummary.mockResolvedValueOnce([]);
+
+    const res = await supertest(app)
+      .get(`/accounts/${ALICE}/summary`)
+      .query({ clientVersion: "1.2.3", futureFlag: "on" });
+
+    expect(res.status).toBe(200);
+    expect(getAccountSummary).toHaveBeenLastCalledWith(ALICE, undefined, "testnet");
+  });
+
+  it.each(["fromDate", "toDate"])("refuses %s because it cannot honour a date window", async (parameter) => {
     // Deliberately does not re-arm the mock: nothing should reach it.
     const callsBefore = getAccountSummary.mock.calls.length;
 
     const res = await supertest(app)
       .get(`/accounts/${ALICE}/summary`)
-      .query({ fromDate: "2024-01-01T00:00:00.000Z", toDate: "2024-02-01T00:00:00.000Z" });
+      .query({ [parameter]: "2024-01-01T00:00:00.000Z" });
 
     // The rollup holds one all-time row per asset. Returning every month for a
     // request that asked for one is the failure; 400 is the honest answer.
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/fromDate|Unrecognized key/i);
+    expect(res.body.error).toContain(parameter);
     expect(getAccountSummary.mock.calls.length).toBe(callsBefore);
   });
 

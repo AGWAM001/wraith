@@ -1179,17 +1179,6 @@ else {
         .json({ error: err.message, code: err.status >= 500 ? "internal_error" : "invalid_request" });
     }
 
-    // Anything else is unhandled, and its message is not ours to show. This
-    // handler used to answer `err.message` verbatim, which is how a Postgres
-    // connection string reached callers through a raw driver error. The caller
-    // gets a correlation id; the detail stays in the log.
-    //
-    // The id is the one the request already has, not a fresh one: a person
-    // reporting a failed cash-out quotes the id on the screen, and the provider
-    // call that failed wrote its log lines under that same id. Minting a second
-    // id here meant the report and the logs never met.
-    const correlationId = (req as RequestWithId).requestId ?? newCorrelationId();
-    console.error(`[api] Unhandled error (${correlationId}):`, err);
     // A body the parser could not read is the caller's mistake, not ours. Its
     // error object carries the whole raw body, which can hold a national ID
     // number or bank details, so only the failure type is logged.
@@ -1201,7 +1190,11 @@ else {
         .json({ error: "The request body could not be read", code: "invalid_request" });
     }
 
-    const correlationId = newCorrelationId();
+    // The id is the one the request already has, not a fresh one: a person
+    // reporting a failed cash-out quotes the id on the screen, and the provider
+    // call that failed wrote its log lines under that same id. Minting a second
+    // id here meant the report and the logs never met.
+    const correlationId = (req as RequestWithId).requestId ?? newCorrelationId();
     // Never the raw error: libraries hang request data on their errors.
     console.error(`[api] Unhandled error (${correlationId}):`, loggableError(err));
 

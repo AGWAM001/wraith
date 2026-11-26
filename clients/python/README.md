@@ -62,40 +62,29 @@ client.close()  # or use the client as a context manager
 ## Coverage
 
 What the Python client reaches today, against the whole API. `✅` the group in
-full, `◐` part of it, `—` none of it. This client covers the least, and you
-should know that before installing rather than after.
+full, `◐` part of it, `—` none of it.
 
 | Group                | Python | Gap                                                            |
 | -------------------- | :----: | -------------------------------------------------------------- |
 | Transfers            | ✅     |                                                                 |
 | Accounts             | ◐      | `account_balance()` missing (`GET /accounts/{address}/balance`) |
-| Windowed summary     | —      | `GET /summary/{address}` missing                   |
+| Windowed summary     | —      | `GET /summary/{address}` missing                               |
 | Assets               | ✅     |                                                                 |
-| NFTs                 | —      | missing entirely                                 |
-| Status               | —      | missing                                          |
-| Token directory      | —      | `GET /tokens` missing                            |
-| Host-fn logs         | —      | missing; only react-query has it                 |
-| Webhooks             | —      | missing; and no client can subscribe yet         |
-| Search, candles, fees, offramp, NGN rails | — | #308                                  |
-| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate |
+| NFTs                 | ✅     |                                                                 |
+| Status               | ✅     |                                                                 |
+| Token directory      | —      | `GET /tokens` missing                                          |
+| Host-fn logs         | —      | missing; Go and react-query have it                            |
+| Webhooks             | ✅     | list, deliveries, create and delete                            |
+| Search               | —      | missing; Go has it                                            |
+| Candles, fees, offramp, NGN rails | — | #308                                                   |
+| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate       |
 
-Everything in the "missing" rows above that has an obvious shape is #312, which
-brings this client to parity with the Go one: `status`, `nfts`, `webhooks`.
 The full table — every client, and why each gap is open or deliberate — is
 [docs/client-coverage.md](../../docs/client-coverage.md). Change this row and
 that row in the same PR.
 
-Note also that every method here reads the deployment's default network: there
-is no way to ask for the other one (#411), and the error code the API returns is
-dropped (#410).
-| Area      | Methods                                                                                  |
-| --------- | ---------------------------------------------------------------------------------------- |
-| Transfers | `incoming_transfers`, `outgoing_transfers`, `address_transfers`, `transaction_transfers` |
-| Accounts  | `account_summary`, `account_transfers`                                                   |
-| Assets    | `popular_assets`                                                                         |
-| Status    | `status`                                                                                 |
-| NFTs      | `nft_transfers`, `nft_owner`                                                             |
-| Webhooks  | `webhooks`, `webhook_deliveries`, `create_webhook`, `delete_webhook`                     |
+Every method here reads the deployment's default network: there is no way to ask
+for the other one (#411), and the error code the API returns is dropped (#410).
 
 All responses are returned as typed dataclasses (`Transfer`, `TransferPage`,
 `AccountSummary`, `AssetHolding`, `PopularAssets`, `PopularAsset`, `Status`,

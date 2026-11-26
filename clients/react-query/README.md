@@ -97,10 +97,11 @@ What this client reaches today, against the whole API. `✅` the group in full,
 | NFTs                 | ◐           | no `GET /nfts/owners/{contract}/{token_id}` |
 | Status               | ✅          |                                                           |
 | Token directory      | —           | no `GET /tokens`                             |
-| Host-fn logs         | ✅          | the only client with this                                |
+| Host-fn logs         | ✅          | Go also has it                                        |
 | Webhooks             | ◐           | `useWebhooks`, `useWebhookDeliveries` — no subscribe, no delete |
-| Search, candles, fees, offramp, NGN rails | — | #308                                |
-| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate |
+| Search               | —           | missing; Go has it                                    |
+| Candles, fees, offramp, NGN rails | — | #308                                             |
+| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate      |
 
 The full table — every client, and why each gap is open or deliberate — is
 [docs/client-coverage.md](../../docs/client-coverage.md). Change this row and

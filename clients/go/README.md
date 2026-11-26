@@ -135,16 +135,17 @@ hand-rolling `net/http` against a documented route.
 | Group                | Go    | Gap                                                              |
 | -------------------- | :---: | ---------------------------------------------------------------- |
 | Transfers            | ✅    |                                                                   |
-| Accounts             | ◐     | `GET /accounts/{address}/balance` uncovered          |
-| Windowed summary     | —     | `GET /summary/{address}` uncovered                     |
+| Accounts             | ✅    |                                                                   |
+| Windowed summary     | —     | `GET /summary/{address}` uncovered                                |
 | Assets               | ✅    |                                                                   |
-| NFTs                 | ◐     | `GET /nfts/owners/{contract}/{token_id}` uncovered |
+| NFTs                 | ✅    |                                                                   |
 | Status               | ✅    |                                                                   |
-| Token directory      | —     | `GET /tokens` uncovered                              |
-| Host-fn logs         | —     | uncovered; react-query has it                                    |
-| Webhooks             | ◐     | `List`, `Deliveries` only — no `POST /webhooks`, no delete |
-| Search, candles, fees, offramp, NGN rails | — | #308                                  |
-| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate |
+| Token directory      | ✅    |                                                                   |
+| Host-fn logs         | ✅    |                                                                   |
+| Webhooks             | ◐     | `List`, `Deliveries` only — no `POST /webhooks`, no delete         |
+| Search               | ✅    |                                                                   |
+| Candles, fees, offramp, NGN rails | — | #308                                                     |
+| Exports, ops, liveness, bot and provider callbacks, GraphQL | — | deliberate               |
 
 The full table — every client, and why each gap is open or deliberate — is
 [docs/client-coverage.md](../../docs/client-coverage.md). Change this row and

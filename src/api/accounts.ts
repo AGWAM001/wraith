@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { getAccountSummary, queryBalances } from "../db";
 import { toDisplayAmount } from "../amount";
 import { createAccountsTransfersRouter } from "../routes/accounts/transfers";
-import { parseOr400 } from "../openapi/validation";
+import { parseOr400, sendValidationError } from "../openapi/validation";
 import { accountSummaryQuerySchema } from "../openapi/schemas";
 import { requestNetwork } from "../middleware/network";
 import { getCachedTokenDecimals } from "../tokenCache";
@@ -82,6 +82,16 @@ export function createAccountsRouter(): Router {
       try {
         const parsed = parseOr400(accountSummaryQuerySchema, { ...req.params, ...req.query }, res);
         if (!parsed) return;
+        if (req.query.fromDate !== undefined || req.query.toDate !== undefined) {
+          sendValidationError(res, {
+            issues: [{
+              message:
+                "fromDate and toDate are not supported on the all-time account summary; " +
+                "use /summary/:address for a date window",
+            }],
+          });
+          return;
+        }
         const { address, contractId } = parsed;
 
         const network = requestNetwork(req);

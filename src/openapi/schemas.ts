@@ -530,20 +530,20 @@ export const summaryQuerySchema = z.object({
 }).passthrough();
 
 /**
- * What `GET /accounts/{address}/summary` takes, and takes strictly.
+ * What `GET /accounts/{address}/summary` takes.
  *
  * Narrower than {@link summaryQuerySchema} on purpose. That route computes over
  * the transfer rows and can honour a date window; this one reads the
  * materialised `AccountSummary` rollup, which holds one all-time row per asset
- * and has no window to filter. Accepting `fromDate` and quietly returning
- * all-time totals was the failure this replaces: a caller who asked for a
- * month got everything and had no way to know.
+ * and has no window to filter. The route rejects `fromDate` and `toDate`
+ * explicitly, but unrelated query parameters pass through for compatibility
+ * with installed apps that add their own.
  */
 export const accountSummaryQuerySchema = z.object({
   ...withNetwork,
   address: stellarAddressSchema,
   contractId: optionalQueryString("Token contract ID to filter by"),
-}).strict();
+}).passthrough();
 
 export const txHashParamsSchema = z.object({
   txHash: queryString("Transaction hash"),

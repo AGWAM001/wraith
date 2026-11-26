@@ -17,15 +17,15 @@ reason this file exists:
 | Group | Routes | Go | react-query | Python | Gap |
 | --- | --- | :-: | :-: | :-: | --- |
 | Transfers | `/transfers/incoming`, `/outgoing`, `/address`, `/tx` | ✅ | ✅ | ✅ | |
-| Accounts | `/accounts/{address}/summary`, `/transfers`, `/balance` | ◐ | ◐ | ◐ | open — `balance` in none |
+| Accounts | `/accounts/{address}/summary`, `/transfers`, `/balance` | ✅ | ◐ | ◐ | open — `balance` missing from react-query and Python |
 | Windowed summary | `/summary/{address}` | — | — | — | open — |
 | Assets | `/assets/popular` | ✅ | ✅ | ✅ | |
-| NFTs | `/nfts/transfers`, `/nfts/owners/{contract}/{token_id}` | ◐ | ◐ | — | open — `owners` in none; Python #312 |
-| Status | `/status` | ✅ | ✅ | — | open — #312 |
-| Token directory | `/tokens` | — | — | — | open — |
-| Host-fn logs | `/host-fn/{contractId}` | — | ✅ | — | open — react-query only |
-| Webhooks | `GET`/`POST /webhooks`, `DELETE /webhooks/{id}`, `/webhooks/{id}/deliveries` | ◐ | ◐ | — | open — read-only in both: no client can subscribe. Python #312 |
-| Search | `/search` | — | — | — | open — #308 |
+| NFTs | `/nfts/transfers`, `/nfts/owners/{contract}/{token_id}` | ✅ | ◐ | ✅ | open — `owners` missing from react-query |
+| Status | `/status` | ✅ | ✅ | ✅ | |
+| Token directory | `/tokens` | ✅ | — | — | open — missing from react-query and Python |
+| Host-fn logs | `/host-fn/{contractId}` | ✅ | ✅ | — | open — missing from Python |
+| Webhooks | `GET`/`POST /webhooks`, `DELETE /webhooks/{id}`, `/webhooks/{id}/deliveries` | ◐ | ◐ | ✅ | open — Go and react-query are read-only; Python can subscribe, list deliveries and delete |
+| Search | `/search` | ✅ | — | — | open — missing from react-query and Python; Go's part of #308 is done |
 | Candles | `/candles/{bucket}/{contractId}` | — | — | — | open — #308 |
 | Fees | `/fees`, `/fees/report` | — | — | — | open — #308 |
 | Offramp | `/offramp/availability`, `/rate`, `/trustline`, `/verify-bank`, `POST /orders`, `GET /orders/{orderId}` | — | — | — | open — #308 |
@@ -36,7 +36,7 @@ reason this file exists:
 | Bot and provider callbacks | `/discord/interactions`, `/discord/link`, `/webhooks/linq` | — | — | — | deliberate — Discord signs the first, the payout provider signs the last, and a browser opens the middle |
 | GraphQL | `/graphql` | — | — | — | deliberate — a second protocol; these clients are REST |
 
-## Two things no client does
+## Cross-client gaps
 
 Both are wider than any single row above, so they are recorded here rather than
 repeated down the table:
@@ -46,10 +46,10 @@ repeated down the table:
   to pass it at all, and react-query's only route in is a client-level header
   that no cache key includes, so one `QueryClient` pointed at two chains serves
   one chain's answer for the other (#413).
-- **Writes.** No client makes a non-`GET` call, anywhere. The two that expose
-  webhooks list them and read deliveries; nobody can subscribe. That is what
-  makes the offramp row's `POST /orders` gap (#308) a pattern rather than an
-  oversight in one place.
+- **Writes.** Python can create and delete webhook subscriptions; Go and
+  react-query can only list subscriptions and deliveries. No client can place
+  an offramp order, which is why that row's `POST /orders` gap (#308) is about
+  the money rails rather than webhook support.
 
 ## Keeping this honest
 
