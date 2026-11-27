@@ -20,6 +20,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 import { Counter, Gauge, Histogram, Registry, collectDefaultMetrics } from "prom-client";
 import type { Network } from "./network";
+import { endingsOf } from "./linq/providerStatus";
 
 export const registry = new Registry();
 
@@ -262,6 +263,20 @@ export const transfersStoredTotal = new Counter({
   registers: [registry],
 });
 
+/** Outcomes for token metadata cache and RPC lookups; labels are fixed and bounded. */
+export type TokenMetadataLookupOutcome =
+  | "hit"
+  | "miss"
+  | "failed"
+  | "skipped_recent_failure";
+
+export const tokenMetadataLookupsTotal = new Counter({
+  name: "token_metadata_lookups_total",
+  help: "Token metadata lookup outcomes",
+  labelNames: ["outcome"] as const,
+  registers: [registry],
+});
+
 /**
  * Failed RPC attempts, counted per attempt rather than per call.
  *
@@ -387,21 +402,6 @@ export type OrderTerminalStatus =
   | "timeout";
 
 /**
- * Segments that mean the order is still moving, whatever ending-word appears
- * beside them. Checked before the endings below because those are substring
- * matches: "refund_pending" contains "refund".
- */
-const STILL_MOVING_SEGMENTS = [
-  "pending",
-  "processing",
-  "awaiting",
-  "queued",
-  "initiated",
-  "progress",
-  "not",
-];
-
-/**
  * Map any provider or webhook status to a bounded terminal status, or null.
  *
  * Statuses arrive from several places and are not one vocabulary: a webhook
@@ -412,27 +412,30 @@ const STILL_MOVING_SEGMENTS = [
  * returns null and is not counted as terminal.
  */
 export function terminalStatusOf(status: string | null | undefined): OrderTerminalStatus | null {
-  if (!status) return null;
-  const s = status.toLowerCase();
-
   // Reading a pending status as an ending does more than inflate the counter:
   // the caller only records a transition when the previous status was not
   // terminal, so once "refund_pending" counts as refunded, the actual refund is
-  // never counted at all.
-  const segments = s.split(/[^a-z]+/).filter(Boolean);
-  if (segments.some((segment) => STILL_MOVING_SEGMENTS.includes(segment))) return null;
-
-  if (s.includes("completed")) return "completed";
-  if (s.includes("settled")) return "settled";
-  if (s.includes("disbursed")) return "disbursed";
-  if (s.includes("failed")) return "failed";
-  if (s.includes("expire")) return "expired";
-  if (s.includes("cancel")) return "cancelled";
-  if (s.includes("refund")) return "refunded";
-  if (s.includes("revers")) return "reversed";
-  if (s.includes("timeout")) return "timeout";
-  return null;
+  // never counted at all. `classifyProviderStatus` lets a still-moving word win.
+  const endings = endingsOf(status);
+  return TERMINAL_PRIORITY.find((terminal) => endings.includes(terminal)) ?? null;
 }
+
+/**
+ * Which ending labels a status that names more than one ("timeout: payout
+ * never completed" is labelled completed, as it always was). "rejected" is not
+ * a terminal label; the order's own ending word is.
+ */
+const TERMINAL_PRIORITY: readonly OrderTerminalStatus[] = [
+  "completed",
+  "settled",
+  "disbursed",
+  "failed",
+  "expired",
+  "cancelled",
+  "refunded",
+  "reversed",
+  "timeout",
+];
 
 /**
  * Orders created successfully, by rail.
@@ -612,6 +615,25 @@ export const feeQuoteRecordFailuresTotal = new Counter({
   name: "veil_fee_quote_record_failures_total",
   help: "Fee quotes that could not be written to the fee ledger",
   labelNames: ["network"] as const,
+  registers: [registry],
+});
+
+/**
+ * Discord 429 answers, by the kind of call that got them.
+ *
+ * The bot's role sync is a long chain of single calls, so a rate limit in the
+ * middle is how a member ends up with half their roles. Counted the moment the
+ * 429 arrives — whether or not our retry absorbed it — because the question is
+ * how often Discord pushes us back.
+ *
+ * `kind` is one of five words from `DISCORD_CALL_KINDS`, never a path: a path
+ * carries a guild id, a user id and a role id, and an unbounded label makes
+ * /metrics grow until it cannot be scraped.
+ */
+export const discordRateLimitedTotal = new Counter({
+  name: "discord_rate_limited_total",
+  help: "Discord API 429 responses, by kind of call",
+  labelNames: ["kind"] as const,
   registers: [registry],
 });
 
