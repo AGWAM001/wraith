@@ -23,6 +23,7 @@ import { timingSafeEqual } from "crypto";
 import { Router, Request, Response, NextFunction } from "express";
 
 import { prisma } from "../db";
+import { sendError } from "./errors";
 import { isMoneyFailureKind, isMoneyFailureRail } from "../linq/moneyFailures";
 import { hasNetworkSelector, requestNetwork } from "../middleware/network";
 
@@ -76,13 +77,13 @@ export function createOpsRouter(): Router {
   // gate it would be a public index of every payout that did not complete.
   router.use((req: Request, res: Response, next: NextFunction) => {
     if (!isConfigured()) {
-      res.status(503).json({ error: "Ops endpoints are not configured on this deployment" });
+      sendError(res, 503, "not_configured", "Ops endpoints are not configured on this deployment");
       return;
     }
     const token = bearerToken(req);
     if (!token || !tokenMatches(token, process.env.OPS_TOKEN!.trim())) {
       res.setHeader("WWW-Authenticate", "Bearer");
-      res.status(401).json({ error: "An operator token is required" });
+      sendError(res, 401, "unauthorized", "An operator token is required");
       return;
     }
     next();
@@ -103,14 +104,17 @@ export function createOpsRouter(): Router {
   router.get("/failures", async (req: Request, res: Response) => {
     const rail = req.query["rail"];
     if (rail !== undefined && !isMoneyFailureRail(rail)) {
-      res.status(400).json({ error: "rail must be one of: offramp, onramp, bill, unknown" });
+      sendError(res, 400, "invalid_request", "rail must be one of: offramp, onramp, bill, unknown");
       return;
     }
     const kind = req.query["kind"];
     if (kind !== undefined && !isMoneyFailureKind(kind)) {
-      res
-        .status(400)
-        .json({ error: "kind must be one of: payout_rejected, order_failed, reconcile_failed" });
+      sendError(
+        res,
+        400,
+        "invalid_request",
+        "kind must be one of: payout_rejected, order_failed, reconcile_failed",
+      );
       return;
     }
 
@@ -118,7 +122,7 @@ export function createOpsRouter(): Router {
     if (req.query["limit"] !== undefined) {
       const parsedLimit = parsePositiveInteger(req.query["limit"]);
       if (parsedLimit === null) {
-        res.status(400).json({ error: "limit must be a positive integer" });
+        sendError(res, 400, "invalid_request", "limit must be a positive integer");
         return;
       }
       limit = Math.min(parsedLimit, MAX_LIMIT);
@@ -128,7 +132,7 @@ export function createOpsRouter(): Router {
     if (req.query["before"] !== undefined) {
       const parsedBefore = parsePositiveInteger(req.query["before"]);
       if (parsedBefore === null) {
-        res.status(400).json({ error: "before must be a positive integer" });
+        sendError(res, 400, "invalid_request", "before must be a positive integer");
         return;
       }
       before = parsedBefore;
@@ -138,12 +142,12 @@ export function createOpsRouter(): Router {
     if (req.query["since"] !== undefined) {
       const rawSince = Array.isArray(req.query["since"]) ? req.query["since"][0] : req.query["since"];
       if (typeof rawSince !== "string" || !rawSince.trim()) {
-        res.status(400).json({ error: "since must be a valid ISO date" });
+        sendError(res, 400, "invalid_request", "since must be a valid ISO date");
         return;
       }
       const parsedDate = new Date(rawSince.trim());
       if (isNaN(parsedDate.getTime())) {
-        res.status(400).json({ error: "since must be a valid ISO date" });
+        sendError(res, 400, "invalid_request", "since must be a valid ISO date");
         return;
       }
       since = parsedDate;
@@ -202,7 +206,7 @@ export function createOpsRouter(): Router {
         "[ops] could not list money failures:",
         (err as Error)?.name ?? "unknown error",
       );
-      res.status(500).json({ error: "Could not list failures" });
+      sendError(res, 500, "internal_error", "Could not list failures");
     }
   });
 

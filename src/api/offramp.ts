@@ -524,7 +524,7 @@ export function createOfframpRouter(
       walletAddress,
     });
     if (requestHash === null) {
-      res.status(503).json({ error: "Offramp is not configured on this deployment" });
+      res.status(503).json({ error: "Offramp is not configured on this deployment", code: "not_configured" });
       return;
     }
     const replayOf = { walletAddress, ...parsedAmounts, requestHash };

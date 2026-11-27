@@ -182,6 +182,7 @@ registry.registerPath({
   request: { query: statusQuerySchema },
   responses: {
     200: { description: "OK", content: { "application/json": { schema: statusResponseSchema } } },
+    503: { description: "Database unavailable", content: { "application/json": { schema: errorResponseSchema } } },
     ...commonErrorResponses,
   },
 });
@@ -463,6 +464,7 @@ registry.registerPath({
   request: { query: feesQuerySchema },
   responses: {
     200: { description: "OK", content: { "application/json": { schema: feesResponseSchema } } },
+    500: { description: "Internal Server Error", content: { "application/json": { schema: errorResponseSchema } } },
   },
 });
 
@@ -561,8 +563,8 @@ registry.registerPath({
 const internalErrorResponses = {
   400: { description: "Bad Request", content: { "application/json": { schema: railErrorResponseSchema } } },
   404: { description: "Not Found", content: { "application/json": { schema: railErrorResponseSchema } } },
-  500: { description: "Internal Server Error", content: { "application/json": { schema: railErrorResponseSchema } } },
   429: { description: "Rate limited (this deployment's or the provider's — the `code` says which)", content: { "application/json": { schema: railErrorResponseSchema } } },
+  500: { description: "Internal Server Error", content: { "application/json": { schema: railErrorResponseSchema } } },
   502: { description: "Payout provider error", content: { "application/json": { schema: railErrorResponseSchema } } },
   503: { description: "Offramp not configured on this deployment", content: { "application/json": { schema: railErrorResponseSchema } } },
 };
@@ -580,7 +582,9 @@ registry.registerPath({
       description: "OK",
       content: { "application/json": { schema: offrampAvailabilityResponseSchema } },
     },
-    ...commonErrorResponses,
+    400: { description: "Bad Request", content: { "application/json": { schema: railErrorResponseSchema } } },
+    404: { description: "Not Found", content: { "application/json": { schema: railErrorResponseSchema } } },
+    500: { description: "Internal Server Error", content: { "application/json": { schema: railErrorResponseSchema } } },
     // No 502: nothing here reaches the provider. 503 is the answer a client
     // hides its cash-out CTA on, so it is the one that has to be documented.
     503: { description: "Offramp not configured on this deployment", content: { "application/json": { schema: railErrorResponseSchema } } },
