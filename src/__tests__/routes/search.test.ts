@@ -35,7 +35,8 @@ function buildApp() {
   // Minimal error handler so the route's `next(err)` path is observable.
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ error: err.message });
+      // The same shape the real handler sends: every error body carries a code.
+      res.status(500).json({ error: err.message, code: "internal_error" });
     },
   );
   return withOpenApiResponseValidation(app);

@@ -41,8 +41,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -53,8 +58,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -65,8 +75,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -139,8 +154,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -151,8 +171,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -163,8 +188,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -555,8 +585,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -567,8 +602,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -579,8 +619,30 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Database unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Human-readable message, for display. */
+                            error: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -683,8 +745,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -695,8 +762,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -707,8 +779,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -811,8 +888,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -823,8 +905,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -835,8 +922,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -939,8 +1031,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -951,8 +1048,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -963,8 +1065,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1029,8 +1136,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1041,8 +1153,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1053,8 +1170,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1125,8 +1247,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1137,8 +1264,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1149,8 +1281,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1234,8 +1371,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1246,8 +1388,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1258,8 +1405,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1335,8 +1487,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1347,8 +1504,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1359,8 +1521,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1426,8 +1593,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1438,8 +1610,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1450,8 +1627,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1554,8 +1736,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1566,8 +1753,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1578,8 +1770,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1642,8 +1839,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1654,8 +1856,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1666,8 +1873,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1737,8 +1949,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1749,8 +1966,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1761,8 +1983,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1815,8 +2042,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1827,8 +2059,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1839,8 +2076,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1910,8 +2152,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1922,8 +2169,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -1934,8 +2186,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2012,8 +2269,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2024,8 +2286,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2036,8 +2303,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2132,8 +2404,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2144,8 +2421,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2156,8 +2438,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2217,8 +2504,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2229,8 +2521,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2241,8 +2538,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2313,8 +2615,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2325,8 +2632,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2337,8 +2649,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2399,8 +2716,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2411,8 +2733,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2423,8 +2750,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2491,8 +2823,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2503,8 +2840,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2515,8 +2857,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2584,6 +2931,23 @@ export interface paths {
                                     max?: string;
                                 };
                             };
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Human-readable message, for display. */
+                            error: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2688,8 +3052,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2700,8 +3069,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2712,8 +3086,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2724,8 +3103,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2736,8 +3120,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2803,8 +3192,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2815,8 +3209,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2827,8 +3226,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2894,8 +3298,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2906,8 +3315,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2918,8 +3332,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2974,8 +3393,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -2986,8 +3410,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -4143,8 +4572,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -4155,8 +4589,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -4167,8 +4606,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };
@@ -4179,8 +4623,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Human-readable message, for display. */
                             error: string;
-                            code?: string;
+                            /**
+                             * @description Stable machine-readable code to branch on. Wraith codes are a closed, documented set; a client must default on any value it does not recognise.
+                             * @example invalid_request
+                             */
+                            code: string;
                         };
                     };
                 };

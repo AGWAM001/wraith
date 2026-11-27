@@ -72,16 +72,16 @@ export function isAuthorisedScraper(req: Request, expected = metricsScrapeTokenF
 export function metricsAccessGuard(req: Request, res: Response, next: NextFunction): void {
   const expected = metricsScrapeTokenFromEnv();
   if (!expected) {
-    res.status(503).json({ error: "metrics endpoint is not configured" });
+    res.status(503).json({ error: "metrics endpoint is not configured", code: "not_configured" });
     return;
   }
   if (!bearerTokenOf(req)) {
     res.setHeader("WWW-Authenticate", 'Bearer realm="metrics"');
-    res.status(401).json({ error: "authentication required" });
+    res.status(401).json({ error: "authentication required", code: "unauthorized" });
     return;
   }
   if (!isAuthorisedScraper(req, expected)) {
-    res.status(403).json({ error: "forbidden" });
+    res.status(403).json({ error: "forbidden", code: "forbidden" });
     return;
   }
   next();
