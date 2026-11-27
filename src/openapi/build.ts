@@ -182,6 +182,7 @@ registry.registerPath({
   request: { query: statusQuerySchema },
   responses: {
     200: { description: "OK", content: { "application/json": { schema: statusResponseSchema } } },
+    503: { description: "Database unavailable", content: { "application/json": { schema: errorResponseSchema } } },
     ...commonErrorResponses,
   },
 });
@@ -463,6 +464,7 @@ registry.registerPath({
   request: { query: feesQuerySchema },
   responses: {
     200: { description: "OK", content: { "application/json": { schema: feesResponseSchema } } },
+    500: { description: "Internal Server Error", content: { "application/json": { schema: errorResponseSchema } } },
   },
 });
 

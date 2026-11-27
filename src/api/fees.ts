@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from "express";
 
 import { requestNetwork } from "../middleware/network";
 import { feeReport, recordFeeQuotes } from "./feeLedger";
+import { sendError } from "./errors";
 
 /**
  * What Veil charges, answered by the server so the number is never in an APK.
@@ -370,12 +371,12 @@ export function feesRouter(): Router {
     res.setHeader("Cache-Control", "no-store");
     const expected = process.env.VEIL_FEE_REPORT_TOKEN?.trim();
     if (!expected) {
-      res.status(503).json({ error: "Fee reporting is not configured on this deployment" });
+      sendError(res, 503, "not_configured", "Fee reporting is not configured on this deployment");
       return;
     }
     if (!sameSecret(bearer(req), expected)) {
       res.setHeader("WWW-Authenticate", "Bearer");
-      res.status(401).json({ error: "A valid report token is required" });
+      sendError(res, 401, "unauthorized", "A valid report token is required");
       return;
     }
 
@@ -384,7 +385,7 @@ export function feesRouter(): Router {
     const to = req.query["to"] === undefined ? from : String(req.query["to"]);
     const range = reportRange(from, to);
     if (typeof range === "string") {
-      res.status(400).json({ error: range });
+      sendError(res, 400, "invalid_request", range);
       return;
     }
 
@@ -392,7 +393,7 @@ export function feesRouter(): Router {
       res.json(await feeReport(requestNetwork(req), range.from, range.to));
     } catch (err) {
       console.error(`[fees] report failed: ${err instanceof Error ? err.message : String(err)}`);
-      res.status(500).json({ error: "Could not read the fee ledger" });
+      sendError(res, 500, "internal_error", "Could not read the fee ledger");
     }
   });
 

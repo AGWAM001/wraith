@@ -173,7 +173,13 @@ export const networkQuerySchema = z.preprocess(
 const withNetwork = { network: networkQuerySchema };
 
 export const errorResponseSchema = z.object({
-  error: z.string(),
+  error: z.string().openapi({ description: "Human-readable message, for display." }),
+  code: z.string().openapi({
+    description:
+      "Stable machine-readable code to branch on. Wraith codes are a closed, " +
+      "documented set; a client must default on any value it does not recognise.",
+    example: "invalid_request",
+  }),
 });
 
 export const booleanOkResponseSchema = z.object({

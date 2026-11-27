@@ -382,6 +382,7 @@ export function createApp(): express.Application {
     if (invalid.length) {
       res.status(400).json({
         error: `Invalid eventType: "${invalid.join('", "')}". Valid values: transfer, mint, burn, clawback.`,
+        code: "invalid_request",
       });
       return null;
     }
@@ -397,7 +398,10 @@ export function createApp(): express.Application {
     if (val === undefined || val === "") return undefined;
     const d = new Date(String(val));
     if (isNaN(d.getTime())) {
-      res.status(400).json({ error: `Invalid date: "${val}". Expected ISO 8601 (e.g. 2025-01-01T00:00:00Z).` });
+      res.status(400).json({
+        error: `Invalid date: "${val}". Expected ISO 8601 (e.g. 2025-01-01T00:00:00Z).`,
+        code: "invalid_request",
+      });
       return null;
     }
     return d;
@@ -542,7 +546,12 @@ export function createApp(): express.Application {
       ]);
 
       if (lastIndexedResult.status === "rejected") {
-        res.status(503).json({ ok: false, status: "down", error: "Database unavailable" });
+        res.status(503).json({
+          ok: false,
+          status: "down",
+          error: "Database unavailable",
+          code: "internal_error",
+        });
         return;
       }
 
@@ -1183,6 +1192,7 @@ else {
         if (owner === null) {
           res.status(404).json({
             error: "Token not found. No transfers indexed for this contract/token_id.",
+            code: "not_found",
           });
           return;
         }
