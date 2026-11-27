@@ -5,7 +5,7 @@ import path from "path";
 import request from "supertest";
 import { createApp } from "../api";
 import { resetPersistedQueryCache } from "../graphql/persisted";
-import { persistQueryFiles } from "../../scripts/persist-graphql-queries";
+import { persistQueryFiles } from "../graphql/persist-queries";
 
 jest.mock("../db", () => ({
   getAccountSummary: jest.fn().mockResolvedValue([]),

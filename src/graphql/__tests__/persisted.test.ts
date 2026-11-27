@@ -29,7 +29,7 @@ import {
   persistedQueryPlugin,
   resetPersistedQueryCache,
 } from "../persisted";
-import { persistQueryFiles } from "../../../scripts/persist-graphql-queries";
+import { persistQueryFiles } from "../persist-queries";
 
 type RequestContext = Parameters<
   NonNullable<typeof persistedQueryPlugin.requestDidStart>
